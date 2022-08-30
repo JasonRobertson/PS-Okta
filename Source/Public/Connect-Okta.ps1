@@ -93,5 +93,7 @@ function Connect-Okta {
       Write-Host -ForegroundColor Yellow "Verify the ApiToken and Domain are valid."
     }
   }
-  end {}
+  end {
+    Remove-Variable apiToken
+  }
 }

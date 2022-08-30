@@ -5,7 +5,6 @@ param(
 
 $params = @{
   SourcePath                  = "$PSScriptRoot\Source\Okta.psd1"
-
   CopyPaths                   = @("$PSScriptRoot\README.md")
   Version                     = $version
   UnversionedOutputDirectory  = $true
