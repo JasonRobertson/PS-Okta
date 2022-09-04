@@ -1,0 +1,6 @@
+name: build-ps-okta
+
+# Controls when the workflow will run
+on:
+  push:
+#    branches: [ "main" ]
