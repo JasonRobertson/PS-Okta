@@ -1,0 +1,55 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  version: 0.0.2
+
+steps:
+- task: PowerShell@2
+  displayName: Install Modules
+  name: installmodules
+  inputs:
+    pwsh: true
+    targetType: filePath
+    filepath: $(Build.SourcesDirectory)/Install-Requirements.ps1
+
+- task: PowerShell@2
+  displayName: Build Module
+  name: modulebuilder
+  inputs:
+    pwsh: true
+    targetType: filePath
+    filepath: $(Build.SourcesDirectory)/Start-ModuleBuild.ps1
+    arguments: -Version $(version)
+
+- task: PowerShell@2
+  displayName: Build Nuget
+  name: nugetbuilder
+  inputs:
+    pwsh: true
+    targetType: filePath
+    filepath: $(Build.SourcesDirectory)/Start-NugetBuild.ps1
+    arguments: -Version $(version)
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifact
+  name: publishartifact
+  inputs:
+    ArtifactName: module
+    PathtoPublish: $(Build.SourcesDirectory)/Output
+
+- task: NuGetCommand@2
+  displayName: Publish to Nuget
+  name: publishnuget
+  inputs:
+    command: push
+    packagesToPush: $(Build.SourcesDirectory)/Output/Nuget/ps-okta*.nupkg
+    publishVstsFeed: PS-Okta/PSModule

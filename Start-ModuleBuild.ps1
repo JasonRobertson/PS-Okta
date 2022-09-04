@@ -4,8 +4,8 @@ param(
 #Requires -Module ModuleBuilder
 
 $params = @{
-  SourcePath                  = "$PSScriptRoot\Source\Okta.psd1"
-  CopyPaths                   = @("$PSScriptRoot\README.md")
+  SourcePath                  = "$PSScriptRoot\Source\PS-Okta.psd1"
+  CopyPaths                   = @("$PSScriptRoot\README.md", "$PSScriptRoot\Source\PS-Okta.nuspec")
   Version                     = $version
   UnversionedOutputDirectory  = $true
 }

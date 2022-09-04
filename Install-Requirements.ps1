@@ -1,4 +1,4 @@
-$modules = 'MoudleBuilder'
+$modules = 'ModuleBuilder'
 foreach ($module in $modules) {
   try {
     Get-InstalledModule -Name $module -ErrorAction Stop
