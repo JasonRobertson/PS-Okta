@@ -20,5 +20,5 @@ Is an unofficial module built for Okta Administrators who like to use PowerShell
 You can find source of ModuleBuilder [here](https://github.com/PoshCode/ModuleBuilder)
 
 ## Version History
-0.0.1 - Very first release
+0.0.1 - Very first release \
 0.0.2 - Filename restructure
