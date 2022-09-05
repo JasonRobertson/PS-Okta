@@ -17,3 +17,11 @@ jobs:
         run: |
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module ModuleBuilder
+  build-module:
+    name: Build PS-Okta Module
+    runs-on: ubuntu-latest
+    steps:
+     - name: Build PS-Okta Module
+       run: 
+        Get-Location
+        Get-ChildItem
