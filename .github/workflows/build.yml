@@ -2,8 +2,6 @@ name: Build PS-Okta Module
 on:
   push:
     branches: [main]
-  pull_requests:
-    branches: [main]
 
 defaults:
   run:
