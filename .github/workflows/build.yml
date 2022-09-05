@@ -23,5 +23,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: install-dependencies
     steps:
-     - name: Build PS-Okta Module
-       run: $env:GITHUB_ACTION_PATH/Start-ModuleBuild.ps1
+      - uses: actions/checkout@v3
+      - name: Build PS-Okta Module
+        run: ${{GITHUB_ACTION_PATH}}/Start-ModuleBuild.ps1
