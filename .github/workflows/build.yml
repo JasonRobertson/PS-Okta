@@ -25,4 +25,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build PS-Okta Module
-        run: ${{GITHUB_ACTION_PATH}}/Start-ModuleBuild.ps1
+        run: ./Start-ModuleBuild.ps1
