@@ -23,6 +23,6 @@ jobs:
     needs: install-dependencies
     steps:
      - name: Build PS-Okta Module
-       run: 
+       run: |
         Get-Location
         Get-ChildItem
