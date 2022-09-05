@@ -6,12 +6,11 @@ on:
 defaults:
   run:
     shell: pwsh
-    runs-on: ubuntu-latest
 
 jobs:
   install-dependencies:
     name: Install Dependencies
-    # runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install from PSGallery
