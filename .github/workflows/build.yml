@@ -1,0 +1,22 @@
+name: Build PS-Okta Module
+on:
+  push:
+    branches: [main]
+  pull_requests:
+    branches: [main]
+
+defaults:
+  run:
+    shell: pwsh
+
+
+jobs:
+  name: Install Dependencies
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - name: Install from PSGallery
+      shell: pwsh
+      run: |
+        Set-PSRespository PSGallery -InstallationPolicy Trusted
+        Install-Module ModuleBuilder
