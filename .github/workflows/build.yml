@@ -15,5 +15,5 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install from PSGallery
         run: |
-          Set-PSRespository PSGallery -InstallationPolicy Trusted
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module ModuleBuilder
