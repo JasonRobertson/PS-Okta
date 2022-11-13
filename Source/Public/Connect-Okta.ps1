@@ -77,13 +77,13 @@ function Connect-Okta {
 
         [PSCustomObject][ordered]@{
           Organization = $domain
-          Requestor    = -join ($requestor.profile.firstName, ' ', $requestor.profile.lastName)
+          Requestor    = $requestor.profile.login
         } | Format-List
 
         #Global Scope is necesary to provide the value for other commands
         $global:connectionOkta = [pscustomobject][ordered]@{
           URI       = $uri
-          ApiToken  = "SSWS $ApiToken" | ConvertTo-SecureString -AsPlainText -Force
+          ApiToken  = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
           ActorID   = $requestor.Id
         }
       }

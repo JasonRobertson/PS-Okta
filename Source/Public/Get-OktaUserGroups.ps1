@@ -24,7 +24,7 @@ function Get-OktaUserGroups {
 
     #region Build the Web Request
     $webRequest                 = [hashtable]::new()
-    $webRequest.Uri             = -join "$oktaUrl/users/$identity/groups"
+    $webRequest.Uri             = "$oktaUrl/users/$identity/groups"
     $webRequest.Body            = $body
     $webRequest.Method          = 'GET'
     $webRequest.Headers         = $headers
