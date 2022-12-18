@@ -12,7 +12,7 @@ Is an unofficial module built for Okta Administrators who like to use PowerShell
 
 - PowerShell 7
 - Okta API Token
-  - ***How to create Okta API token*** [here]([https://](https://help.okta.com/oie/en-us/Content/Topics/Security/API.htm#create-okta-api-token))
+  - ***How to create Okta API token** [here](https://help.okta.com/oie/en-us/Content/Topics/Security/API.htm#create-okta-api-token)
 
 
 ## About ModuleBuilder
