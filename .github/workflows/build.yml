@@ -20,7 +20,6 @@ jobs:
           #updatable: "true"
 
       - name: Show that the Action works
-        shell: powershell
         run: |
           Get-Module -Name ModuleBuilder, platyPS -ListAvailable | Select Path
           Import-Module ModuleBuilder
