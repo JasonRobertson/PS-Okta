@@ -16,7 +16,7 @@ jobs:
         uses: potatoqualitee/psmodulecache@v5.1
         with:
           modules-to-cache: ModuleBuilder, platyPS
-          updateable: "true"
+          updatable: "true"
 
       - name: Show that the Action works
         shell: powershell
