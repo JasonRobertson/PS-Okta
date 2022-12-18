@@ -5,19 +5,18 @@ on:
 defaults:
   run:
     shell: pwsh
-  runs-on: ubuntu-latest
 
 jobs:
   build-module:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
       - name: Install and cache PowerShell modules
         uses: potatoqualitee/psmodulecache@v5.1
         with:
           modules-to-cache: ModuleBuilder, platyPS
 
       - name: Build Module
+        uses: actions/checkout@v3
         run: |
           ./Start-ModuleBuild.ps1
           ./Start-NugetBuild.ps1
