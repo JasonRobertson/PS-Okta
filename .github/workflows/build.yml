@@ -10,13 +10,21 @@ jobs:
   build-module:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
       - name: Install and cache PowerShell modules
         uses: potatoqualitee/psmodulecache@v5.1
         with:
           modules-to-cache: ModuleBuilder, platyPS
+          updateable: "true"
+
+      - name: Show that the Action works
+        shell: powershell
+        run: |
+          Get-Module -Name ModuleBuilder, platyPS -ListAvailable | Select Path
+          Import-Module ModuleBuilder
 
       - name: Build Module
-        uses: actions/checkout@v3
         run: |
           ./Start-ModuleBuild.ps1
           ./Start-NugetBuild.ps1
