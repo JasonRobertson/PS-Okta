@@ -64,7 +64,8 @@ function Update-OktaUser {
     #DisplayName of the user's manager
     [string]$Manager,
     #id of a user's manager
-    [string]$ManagerID
+    [string]$ManagerID,
+    $CustomAttribute
   )
   begin {
     try {
@@ -97,8 +98,8 @@ function Update-OktaUser {
       if ($StreetAddress)     {$payload.streetAddress = $streetAddress}
       if ($City)              {$payload.city = $city}
       if ($State)             {$payload.state = $state}
-      if ($ZipCode)           {$payload.zipCode = zipCode}
-      if ($CountryCode)       {$payload.countryCode = countryCode}
+      if ($ZipCode)           {$payload.zipCode = $ZipCode}
+      if ($CountryCode)       {$payload.countryCode = $countryCode}
       if ($honorificPrefix)   {$payload.honorificPrefix = $honorificPrefix}
       if ($honorificSuffix)   {$payload.honorificSuffix = $honorificSuffix}
       if ($PostAddress)       {$payload.postAddress = $postAddress}
@@ -106,7 +107,10 @@ function Update-OktaUser {
       if ($ManagerID)         {$payload.managerId = $managerID}
       #region Build the body of the web request
       $body         = [hashtable]::new()
-      $body.profile = $payload
+      $body.profile = switch ($null -eq $customAttribute) {
+        True  { $payload }
+        False { $payload + $customAttribute }
+      }
       #endregion
       #region Build the Web Request
       $restMethod                 = [hashtable]::new()
