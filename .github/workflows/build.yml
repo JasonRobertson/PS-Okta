@@ -2,6 +2,7 @@ name: Build PS-Okta Module
 on:
   push:
     branches: [development]
+
 defaults:
   run:
     shell: pwsh
