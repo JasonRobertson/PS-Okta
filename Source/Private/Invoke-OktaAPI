@@ -1,0 +1,37 @@
+function Invoke-OktaAPI {
+  [CmdletBinding()]
+  Param(
+    [Parameter(Mandatory)]
+    [ValidateSet('GET', 'PATCH', 'POST', 'PUT', 'DELETE')]
+    $Method,
+    [Parameter(Mandatory)]
+    $EndPoint,
+    $Body
+  )
+  #Verify the connection has been established
+  $oktaUrl = Test-OktaConnection
+
+  $webRequest                       = [hashtable]::new()
+  $webRequest.Uri                   = "$oktaUrl/$endPoint"
+  $webRequest.Body                  = if($body -and $method -ne 'GET' -or $Method -ne 'DELETE') {$body | ConvertTo-Json -Depth 100}
+  $webRequest.Method                = $method
+  $webRequest.UserAgent             = 'PowerShell/PS-Okta'
+  $webRequest.ContentType           = 'application/json'
+
+  $webRequest.Headers               = [hashtable]::new()
+  $webRequest.Headers.Accept        = 'application/json'
+  $webRequest.Headers.Authorization = Convert-OktaAPIToken
+
+  try {
+    Invoke-WebRequest @webRequest
+  }
+  catch {
+    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+      [Exception]::new($($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary),
+      'ErrorID',
+      [System.Management.Automation.ErrorCategory]::NotInstalled,
+      'Okta'
+    )
+    $pscmdlet.ThrowTerminatingError($errorRecord)
+  }
+}

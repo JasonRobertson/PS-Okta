@@ -40,11 +40,11 @@
     within the powershell session to run other commands in the Okta module.
 #>
 function Connect-Okta {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName='ApiToken')]
   param(
     [parameter(Mandatory)]
     [string]$Domain,
-    [parameter(Mandatory)]
+    [parameter(Mandatory, ParameterSetName='ApiToken')]
     [string]$ApiToken,
     [switch]$Preview
   )
