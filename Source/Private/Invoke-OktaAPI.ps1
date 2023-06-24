@@ -21,7 +21,6 @@ function Invoke-OktaAPI {
   $restMethod.Uri                   = "$oktaUrl/$endPoint"
   $restMethod.Body                  = $body
   $restMethod.Method                = $method
-  $restMethod.UserAgent             = 'PowerShell/PS-Okta'
   $restMethod.ContentType           = 'application/json'
   $restMethod.Headers               = [hashtable]::new()
   $restMethod.Headers.Accept        = 'application/json'

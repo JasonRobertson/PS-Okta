@@ -4,17 +4,22 @@ function Get-OktaUserFactor {
     # Identity is used to fetch a user by id, login, or login shortname if the short name is unambiguous
     [parameter(Mandatory, ValueFromPipeline=$true)]
     [alias('id')]
-    [string[]]$Identity
+    [string[]]$Identity,
+    $Provider
   )
   begin {
     $oktaAPI        = [hashtable]::new()
     $oktaAPI.Method = 'GET'
     $oktaAPI.Body   = $body
     $oktaAPI.All    = $all
+
+    $endPoint = switch ($PSCmdlet.ParameterSetName) {
+      default  {"users/$identity/factors"}
+    }
   }
   process {
     foreach ($id in $(Get-OktaUser -Identity $Identity).id) {
-      $oktaAPI.Endpoint = "users/$id/factors"
+      $oktaAPI.Endpoint = $endPoint
       Invoke-OktaAPI @oktaAPI
     }
   }

@@ -41,10 +41,10 @@ function Get-OktaUser {
                   elseif ($filterStatus) {$filterStatus}
                   elseif ($filterLastUpdated) {$filterLastUpdated}
 
-  $oktaAPI        = [hashtable]::new()
-  $oktaAPI.Method = 'GET'
-  $oktaAPI.Body   = $body
-  $oktaAPI.All    = $all
+  $oktaAPI          = [hashtable]::new()
+  $oktaAPI.Method   = 'GET'
+  $oktaAPI.Body     = $body
+  $oktaAPI.All      = $all
   $oktaAPI.Endpoint = $endPoint
 
   $response = Invoke-OktaAPI @oktaAPI
