@@ -89,39 +89,34 @@ function Update-OktaGroupRule {
 
     #region Build the body of the web request
     Write-Verbose 'Build the body of the web request'
-    $body = @"
-{
-  "type": "group_rule",
-  "id" : "$($oktaGroupRule.ID)",
-  "status": "$($oktaGroupRule.Status)",
-  "name": "$($oktagrouprule.Name)",
-  "conditions": {
-    "people": {
-      "users": {
-        "exclude": [$peopleExclude]
-      },
-      "groups": {
-        "exclude": []
-      }
-    },
-    "expression": {
-      "value": "$($oktaGroupRule.Conditions.Replace('"','\"'))",
-      "type": "urn:okta:expression:1.0"
-    }
-  },
-  "actions": {
-    "assignUserToGroups": {
-      "groupIds": [$groupids]
-    }
-  }
-}
-"@
+    $body                                     = [hashtable]::new()
+    $body.type                                = 'group_rule'
+    $body.id                                  = $oktaGroupRule.ID
+    $body.status                              = $oktaGroupRule.Status
+    $body.name                                = $oktagrouprule.Name
+    #region Body Conditions
+    $body.conditions                          = [hashtable]::new()
+    $body.conditions.people                   = [hashtable]::new()
+    $body.conditions.people.users             = [hashtable]::new()
+    $body.conditions.people.users.exclude     = @( if ($peopleExclude) {$peopleExclude} )
+    $body.conditions.people.groups            = [hashtable]::new()
+    $body.conditions.people.groups.exclude    = @( if ($groupExclude) {$groupExclude} )
+    #endregion
+    #region body Expression
+    $body.expression                          = [hashtable]::new()
+    $body.expression.value                    = $oktaGroupRule.Conditions.Replace('"','\"')
+    $body.expression.type                     = 'urn:okta:expression:1.0'
+    #endregion
+    #region Body Actions
+    $body.actions                             = [hashtable]::new()
+    $body.actions.assignUserToGroups          = [hashtable]::new()
+    $body.actions.assignUserToGroups.groupIds = @( if ($groupids) {$groupids} )
     #endregion
 
     #region Build the Web Request
     $webRequest                 = [hashtable]::new()
     $webRequest.Uri             = -join ($oktaURL,"/api/v1/groups/rules/$($oktaGroupRule.ID)")
-    $webRequest.Body            = $body
+    $webRequest.Body            = $body | ConvertTo-Json -Depth 100
     $webRequest.Method          = 'PUT'
     $webRequest.Headers         = $headers
     $webRequest.ContentType     = 'application/json'
