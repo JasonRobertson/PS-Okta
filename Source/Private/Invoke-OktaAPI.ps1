@@ -17,19 +17,19 @@ function Invoke-OktaAPI {
     False {$body | ConvertTo-Json -Depth 100}
   }
 
-  $webRequest                       = [hashtable]::new()
-  $webRequest.Uri                   = "$oktaUrl/$endPoint"
-  $webRequest.Body                  = $body
-  $webRequest.Method                = $method
-  $webRequest.UserAgent             = 'PowerShell/PS-Okta'
-  $webRequest.ContentType           = 'application/json'
-  $webRequest.Headers               = [hashtable]::new()
-  $webRequest.Headers.Accept        = 'application/json'
-  $webRequest.Headers.Authorization = Convert-OktaAPIToken
+  $restMethod                       = [hashtable]::new()
+  $restMethod.Uri                   = "$oktaUrl/$endPoint"
+  $restMethod.Body                  = $body
+  $restMethod.Method                = $method
+  $restMethod.UserAgent             = 'PowerShell/PS-Okta'
+  $restMethod.ContentType           = 'application/json'
+  $restMethod.Headers               = [hashtable]::new()
+  $restMethod.Headers.Accept        = 'application/json'
+  $restMethod.Headers.Authorization = Convert-OktaAPIToken
   try {
     switch ($All) {
-      true  {Invoke-RestMethod @webRequest -FollowRelLink}
-      false {Invoke-RestMethod @webRequest}
+      true  {Invoke-RestMethod @restMethod -FollowRelLink}
+      false {Invoke-RestMethod @restMethod}
     }
   }
   catch {
