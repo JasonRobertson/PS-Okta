@@ -81,7 +81,7 @@ function Connect-Okta {
         } | Format-List
 
         #Global Scope is necesary to provide the value for other commands
-        $global:connectionOkta = [pscustomobject][ordered]@{
+        $script:connectionOkta = [pscustomobject][ordered]@{
           URI       = $uri
           ApiToken  = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
           ActorID   = $requestor.Id
