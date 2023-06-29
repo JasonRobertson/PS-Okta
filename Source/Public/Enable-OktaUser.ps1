@@ -8,12 +8,13 @@ function Enable-OktaUser {
   )
   begin {
     #region Static Variables
-    #Verify the connection has been established
-    $oktaUrl = Test-OktaConnection
-    $headers                  = [hashtable]::new()
-    $headers.Accept           = 'application/json'
-    $headers.Authorization    = Convert-OktaAPIToken
-    #endregion
+
+    $oktaAPI          = [hashtable]::new()
+    $oktaAPI.Method   = 'GET'
+    $oktaAPI.Body     = $body
+    $oktaAPI.All      = $all
+    $oktaAPI.Endpoint = $endPoint
+
 
     #region Build the Web Request
     $webRequest                 = [hashtable]::new()

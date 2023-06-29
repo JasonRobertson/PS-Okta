@@ -24,15 +24,6 @@ function Get-OktaGroup {
     [switch]$All
   )
   begin {
-    #region Static Variables
-    #Verify the connection has been established
-    $oktaUrl = Test-OktaConnection
-    #region Build the headers
-    $headers                  = [hashtable]::new()
-    $headers.Accept           = 'application/json'
-    $headers.Authorization    = Convert-OktaAPIToken
-    #endregion
-
     $groupType = switch ($type) {
       App     {'APP_GROUP'}
       Okta    {'OKTA_GROUP'}
@@ -59,10 +50,7 @@ function Get-OktaGroup {
     #endregion
     #region Build the Web Request
     $webRequest                 = [hashtable]::new()
-    $webRequest.Uri             = Switch($PSCmdlet.ParameterSetName){
-                                    GroupName   { "$oktaURL/groups/"}
-                                    GroupID     { "$oktaURL/groups/$ID"}
-                                  }
+    $webRequest.Uri             = 
     $webRequest.Body            = $body
     $webRequest.Method          = 'GET'
     $webRequest.Headers         = $headers

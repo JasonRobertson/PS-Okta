@@ -5,7 +5,8 @@ function Get-OktaUserFactor {
     [parameter(Mandatory, ValueFromPipeline=$true)]
     [alias('id')]
     [string[]]$Identity,
-    $Provider
+    [ValidateSet('CUSTOM','DUO','FIDO','GOOGLE','OKTA','RSA','SYMANTEC','YUBICO')]
+    $FactorType
   )
   begin {
     $oktaAPI        = [hashtable]::new()
