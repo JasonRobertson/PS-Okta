@@ -2,7 +2,7 @@ function Invoke-OktaAPI {
   [CmdletBinding()]
   Param(
     [ValidateSet('GET', 'PATCH', 'POST', 'PUT', 'DELETE')]
-    [string]$Method='Get',
+    [string]$Method='GET',
     [Parameter(Mandatory)]
     [string]$EndPoint,
     $Body,
