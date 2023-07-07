@@ -12,8 +12,8 @@ Function New-OktaPKCE {
     # From the ASCII Table in Decimal A-Z a-z 0-9
     $codeVerifier = -join (((48..57) * 4) + ((65..90) * 4) + ((97..122) * 4) | Get-Random -Count $length | ForEach-Object { [char]$_ })
 
-    $hashAlgo       = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
-    $hash           = $hashAlgo.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($codeVerifier))
+    $hashAlgorithm  = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
+    $hash           = $hashAlgorithm.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($codeVerifier))
     $base64Hash     = [System.Convert]::ToBase64String($hash)
     $CodeChallenge  = $base64Hash.Substring(0, 43).Replace("/","_").Replace("+","-").Replace("=","")
 

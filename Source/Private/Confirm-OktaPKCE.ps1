@@ -8,8 +8,8 @@ function Confirm-OktaPKCE {
     Write-Warning "Code Verifier length must be of 43 to 128 characters in length (inclusive)."
   }
   else {
-    $hashAlgo       = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
-    $hash           = $hashAlgo.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($codeVerifier))
+    $hashAlgorithm  = [System.Security.Cryptography.HashAlgorithm]::Create('sha256')
+    $hash           = $hashAlgorithm.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($codeVerifier))
     $base64Hash     = [System.Convert]::ToBase64String($hash)
     $CodeChallenge  = $base64Hash.Substring(0, 43).Replace("/","_").Replace("+","-").Replace("=","")
   
