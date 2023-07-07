@@ -1,8 +1,8 @@
 # Table of Contents <!-- omit in toc -->
 - [About PS-Okta Module](#about-ps-okta-module)
-  - [Requirements](#requirements)
-  - [About ModuleBuilder](#about-modulebuilder)
-  - [Version History](#version-history)
+- [Requirements](#requirements)
+- [About ModuleBuilder](#about-modulebuilder)
+- [Version History](#version-history)
 
 # About PS-Okta Module
 
@@ -21,4 +21,5 @@ You can find source of ModuleBuilder [here](https://github.com/PoshCode/ModuleBu
 
 ## Version History
 0.0.1 - Very first release \
-0.0.2 - Filename restructure
+0.0.2 - Filename restructure \
+0.0.3 - Code revamp with helper functions
