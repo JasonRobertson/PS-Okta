@@ -104,11 +104,10 @@ function New-OktaUser {
 
     $body.profile = if ($customattribute) {$payload + $customAttribute} else {$payload}
 
-    $oktaAPI = [hashtable]::new()
-    $oktaAPI.Method = 'POST'
-    $oktaAPI.Body   = $body
-    $oktaAPI.Endpoint    = "/users"
+    $oktaAPI          = [hashtable]::new()
+    $oktaAPI.Method   = 'POST'
+    $oktaAPI.Body     = $body
+    $oktaAPI.Endpoint = "/users"
 
     Invoke-OktaAPI @oktaAPI
-
 }

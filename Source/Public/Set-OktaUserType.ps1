@@ -1,4 +1,4 @@
-function Update-OktaUserType {
+function Set-OktaUserType {
   [CmdletBinding(DefaultParameterSetName='Default')]
   param(
     #The unique key for the User Type

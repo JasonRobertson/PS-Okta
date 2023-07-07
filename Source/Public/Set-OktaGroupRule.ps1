@@ -1,4 +1,4 @@
-function Update-OktaGroupRule {
+function Set-OktaGroupRule {
   [CmdletBinding(DefaultParameterSetName='Users')]
   param (
     [parameter( Mandatory)]
