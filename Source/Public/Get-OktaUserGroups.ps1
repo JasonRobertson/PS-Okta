@@ -8,8 +8,8 @@ function Get-OktaUserGroups {
   )
   $oktaAPI            = [hashtable]::new()
   $oktaAPI.Body       = [hashtable]::new()
-  $oktaAPI.Body.Limit = $Limit
   $oktaAPI.Body.All   = $All
+  $oktaAPI.Body.Limit = $Limit
   $oktaAPI.Endpoint   = "users/$identity/groups"
 
   Invoke-OktaAPI @oktaAPI
