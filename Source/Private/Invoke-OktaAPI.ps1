@@ -4,7 +4,7 @@ function Invoke-OktaAPI {
     [ValidateSet('GET', 'PATCH', 'POST', 'PUT', 'DELETE')]
     [string]$Method='GET',
     [Parameter(Mandatory)]
-    [string]$EndPoint,
+    [string]$Endpoint,
     $Body,
     [switch]$All
   )
@@ -17,7 +17,7 @@ function Invoke-OktaAPI {
   }
 
   $restMethod                       = [hashtable]::new()
-  $restMethod.Uri                   = "$oktaUrl/$endPoint"
+  $restMethod.Uri                   = "$oktaUrl/$Endpoint"
   $restMethod.Body                  = $body
   $restMethod.Method                = $method
   $restMethod.ContentType           = 'application/json'

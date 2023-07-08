@@ -19,7 +19,7 @@ function Get-OktaUser {
     [parameter(ParameterSetName='Default')]
     [switch]$All
   )
-  $endPoint = switch ($PSCmdlet.ParameterSetName) {
+  $Endpoint = switch ($PSCmdlet.ParameterSetName) {
     Default   {"users"}
     Identity  {"users/$identity"}
   }
@@ -45,7 +45,7 @@ function Get-OktaUser {
   $oktaAPI.Method   = 'GET'
   $oktaAPI.Body     = $body
   $oktaAPI.All      = $all
-  $oktaAPI.Endpoint = $endPoint
+  $oktaAPI.Endpoint = $Endpoint
 
   $response = Invoke-OktaAPI @oktaAPI
   switch ($oktaProfile){

@@ -14,13 +14,13 @@ function Get-OktaUserFactor {
     $oktaAPI.Body   = $body
     $oktaAPI.All    = $all
 
-    $endPoint = switch ($PSCmdlet.ParameterSetName) {
+    $Endpoint = switch ($PSCmdlet.ParameterSetName) {
       default  {"users/$identity/factors"}
     }
   }
   process {
     foreach ($id in $(Get-OktaUser -Identity $Identity).id) {
-      $oktaAPI.Endpoint = $endPoint
+      $oktaAPI.Endpoint = $Endpoint
       Invoke-OktaAPI @oktaAPI
     }
   }

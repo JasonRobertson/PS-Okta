@@ -13,7 +13,7 @@ function Enable-OktaUser {
     $oktaAPI.Method   = 'GET'
     $oktaAPI.Body     = $body
     $oktaAPI.All      = $all
-    $oktaAPI.Endpoint = $endPoint
+    $oktaAPI.Endpoint = $Endpoint
 
 
     #region Build the Web Request
