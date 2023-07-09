@@ -8,20 +8,20 @@ function Get-OktaUserFactor {
     [ValidateSet('ACTIVE','DISABLED','ENROLLED','EXPIRED','INACTIVE','NOT_SETUP','PENDING_ACTIVATION')]
     $Status,
     [ValidateSet('CUSTOM','DUO','FIDO','GOOGLE','OKTA','RSA','SYMANTEC','YUBICO')]
-    $FactorProvider
+    $Provider
   )
   foreach ($userID in $identity) {
     $id = (Invoke-OktaAPI -EndPoint users/$userID).id
     $apiResponse = Invoke-OktaAPI -EndPoint "users/$id/factors"
     
-    if ($FactorProvider -and $Status) {
-      $apiResponse.Where({$_.Provider -eq $FactorProvider -and $_.Status -eq $status})
+    if ($Provider -and $Status) {
+      $apiResponse.Where({$_.Provider -eq $Provider -and $_.Status -eq $status})
     }
     elseif ($status){ 
       $apiResponse.Where({$_.Status -eq $status})
     }
-    elseif ($FactorProvider) {
-      $apiResponse.Where({$_.Provider -eq $FactorProvider})
+    elseif ($Provider) {
+      $apiResponse.Where({$_.Provider -eq $Provider})
     }
     else {
       $apiResponse
