@@ -6,13 +6,11 @@ function Enable-OktaUser {
     [string]$Identity,
     [switch]$SendEmail
   )
-  $oktaAPI                = [hashtable]::new()
-  $oktaAPI.All            = $all
-  $oktaAPI.Method         = 'POST'
-  $oktaAPI.Body           = [hashtable]::new()
-  $oktaAPI.Body.sendEmail = $SendEmail
-
-  $oktaAPI.Endpoint = "users/$oktaUserID/lifecycle/activate"
-
+  $oktaAPI          = [hashtable]::new()
+  $oktaAPI.Method   = 'POST'
+  $oktaAPI.Endpoint = switch ($SendEmail) {
+    true  {"users/$identity/lifecycle/activate?sendEmail=true"}
+    false {"users/$identity/lifecycle/activate?sendEmail=false"}
+  }
   Invoke-OktaAPI @oktaAPI
 }
