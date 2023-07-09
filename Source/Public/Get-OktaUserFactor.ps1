@@ -9,7 +9,6 @@ function Get-OktaUserFactor {
     $Status,
     [ValidateSet('CUSTOM','DUO','FIDO','GOOGLE','OKTA','RSA','SYMANTEC','YUBICO')]
     $FactorProvider
-
   )
   foreach ($userID in $identity) {
     $id = (Invoke-OktaAPI -EndPoint users/$userID).id
