@@ -1,4 +1,4 @@
-function Get-OktaUserGroups {
+function Get-OktaUserGroup {
   param (
     # Identity is used to fetch a user by id, login, or login shortname if the short name is unambiguous
     [string]$Identity,
