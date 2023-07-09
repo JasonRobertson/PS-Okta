@@ -15,7 +15,7 @@ function Reset-OktaUserPasword {
   $oktaAPI.Endpoint = $endPoint
 
   try {
-    Invoke-OktaAPI @oktaAPI -ErrorAction Stop
+    Invoke-OktaAPI @oktaAPI
   }
   catch {
     Write-Error $PSItem.Exception.Message
