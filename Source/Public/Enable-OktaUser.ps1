@@ -6,8 +6,8 @@ function Enable-OktaUser {
     [string]$Identity,
     [switch]$SendEmail
   )
-  if ((Invoke-OktaAPI -EndPoint users/$identity).status -eq 'DEPROVISIONED') {
-    Write-Warning "$identity is already deactivated"
+  if ((Invoke-OktaAPI -EndPoint users/$identity).status -eq 'PROVISIONED') {
+    Write-Warning "$identity is already activated"
   }
   else {
     $oktaAPI          = [hashtable]::new()
