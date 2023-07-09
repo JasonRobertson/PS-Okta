@@ -18,7 +18,7 @@ function Enable-OktaUser {
     }
     try {
       Invoke-OktaAPI @oktaAPI
-      Write-Host "Successfully deactivated $identity"
+      Write-Host "Successfully activated $identity"
     }
     catch {
       Write-Error $PSItem.Exception.Message
