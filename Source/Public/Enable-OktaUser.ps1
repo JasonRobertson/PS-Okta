@@ -6,11 +6,22 @@ function Enable-OktaUser {
     [string]$Identity,
     [switch]$SendEmail
   )
-  $oktaAPI          = [hashtable]::new()
-  $oktaAPI.Method   = 'POST'
-  $oktaAPI.Endpoint = switch ($SendEmail) {
-    true  {"users/$identity/lifecycle/activate?sendEmail=true"}
-    false {"users/$identity/lifecycle/activate?sendEmail=false"}
+  if ((Invoke-OktaAPI -EndPoint users/$identity).status -eq 'DEPROVISIONED') {
+    Write-Warning "$identity is already deactivated"
   }
-  Invoke-OktaAPI @oktaAPI
+  else {
+    $oktaAPI          = [hashtable]::new()
+    $oktaAPI.Method   = 'POST'
+    $oktaAPI.Endpoint = switch ($SendEmail) {
+      true  {"users/$identity/lifecycle/activate?sendEmail=true"}
+      false {"users/$identity/lifecycle/activate?sendEmail=false"}
+    }
+    try {
+      Invoke-OktaAPI @oktaAPI
+      Write-Host "Successfully deactivated $identity"
+    }
+    catch {
+      Write-Error $PSItem.Exception.Message
+    }
+  }
 }
