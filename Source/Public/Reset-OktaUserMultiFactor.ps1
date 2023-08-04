@@ -12,7 +12,7 @@ function Reset-OktaUserMultiFactor {
     [parameter(ParameterSetName='Default')]
     [switch]$All
   )
-  $factorID = if ($provider) {(Get-OktaUserFactor -Identity $Identity -Provider $Provider).id}
+  $factorID = if ($provider) {(Get-OktaUserMultiFactor -Identity $Identity -Provider $Provider).id}
   $endPoint = switch ($PSCmdlet.ParameterSetName) {
     Default  {"/users/$identity/lifecycle/reset_factors"}
     Provider {"/users/$identity/factors/$factorID?removeRecoveryEnrollment=$RemoveRecoveryEnrollment"}
