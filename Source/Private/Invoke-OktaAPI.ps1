@@ -24,15 +24,13 @@ function Invoke-OktaAPI {
   $restMethod.Headers               = [hashtable]::new()
   $restMethod.Headers.Accept        = 'application/json'
   $restMethod.Headers.Authorization = Convert-OktaAPIToken
+  $restMethod.FollowRelLink         = $all
+
   try {
-    switch ($All) {
-      true  {Invoke-RestMethod @restMethod -FollowRelLink}
-      false {Invoke-RestMethod @restMethod}
-    }
+    Invoke-RestMethod @restMethod
   }
   catch {
     $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.trim('Not found: ')
     Write-OktaError -Message $message
   }
 }
-
