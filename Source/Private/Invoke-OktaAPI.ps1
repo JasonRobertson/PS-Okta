@@ -31,13 +31,8 @@ function Invoke-OktaAPI {
     }
   }
   catch {
-    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-      [Exception]::new($($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary),
-      'ErrorID',
-      [System.Management.Automation.ErrorCategory]::NotSpecified,
-      'Okta'
-    )
-    $pscmdlet.ThrowTerminatingError($errorRecord)
+    $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.trim('Not found: ')
+    Write-OktaError -Message $message
   }
 }
 
