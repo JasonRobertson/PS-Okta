@@ -17,19 +17,23 @@ function Get-OktaUserMultiFactor {
 
     if ($id) {
       $apiResponse = Invoke-OktaAPI -EndPoint "users/$id/factors"
-      $response = switch ($pscmdlet.ParameterSetName) {
-        Status   {$apiResponse.Where({$_.Status -eq $status})}
-        Provider {$apiResponse.Where({$_.Provider -eq $Provider})}
+      switch ($pscmdlet.ParameterSetName) {
         Default  {$apiResponse}
-      }
-      switch ($null -ne $response) {
-        True  {$response}
-        False {
-          $message = switch ($pscmdlet.ParameterSetName) {
-            Status   {"No Factor found with Status: '$status'"}
-            Provider {"No Factor found with Provider: '$provider'"}
+        Status   {
+          if ($apiResponse.Where({$_.Status -eq $status})) {
+            $apiResponse.Where({$_.Status -eq $status})
           }
-          Write-OktaError -Message $message
+          else {
+            Write-OktaError -Message "No Factor found with Status: '$status'"
+          }
+        }
+        Provider {
+          if ($apiResponse.Where({$_.Provider -eq $Provider})) {
+            $apiResponse.Where({$_.Provider -eq $Provider})
+          }
+          else {
+            Write-OktaError -Message "No Factor found with Provider: '$provider'"
+          }
         }
       }
     }
