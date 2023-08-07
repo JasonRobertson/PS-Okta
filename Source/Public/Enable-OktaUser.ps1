@@ -21,8 +21,13 @@ function Enable-OktaUser {
     $oktaAPI          = [hashtable]::new()
     $oktaAPI.Method   = 'POST'
     $oktaAPI.Endpoint = $endPoint
-    
-    Invoke-OktaAPI @oktaAPI
-    Write-Host -ForegroundColor Green -Object "Successfully enabled $identity"
+
+    try {
+      Invoke-OktaAPI @oktaAPI
+      Write-Host -ForegroundColor Green -Object "Successfully enabled $identity"
+    }
+    catch {
+      Write-Error $PSITem.Exception.Message
+    }
   }
 }
