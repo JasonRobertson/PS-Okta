@@ -1,13 +1,9 @@
 function Get-OktaGroup {
-  [CmdletBinding(DefaultParameterSetName='GroupID')]
+  [CmdletBinding()]
   param (
-    #
-    [parameter(ParameterSetName='GroupID')]
-    [alias('GroupID')]
-    [string]$ID,
-    [parameter(ParameterSetName='GroupName')]
-    [alias('GroupName')]
-    [string]$Name,
+    [parameter()]
+    [alias('GroupID','ID')]
+    [string]$Identity,
     # Type parameter is used to filter groups based on type
     # App:      Groups Profile and memberships are imported and must be managed within the application that imported the Group.
     #           Note: Active Directory and LDAP Groups also have APP_GROUP type.
@@ -17,69 +13,40 @@ function Get-OktaGroup {
     [ValidateSet('App','BuiltIn', 'Okta')]
     [string]$Type,
     [validaterange(1,10000)]
-    [int]$Limit,
+    [int]$Limit = 10000,
     # Profile is a switch parameter used to only return the profile of the object.
     [alias('GroupProfile')]
     [switch]$Profile,
     [switch]$All
   )
-  begin {
-    $groupType = switch ($type) {
-      App     {'APP_GROUP'}
-      Okta    {'OKTA_GROUP'}
-      BuiltIn {'BUILT_IN'}
-    }
+  $groupType  = switch ($type) {
+                  App     {'APP_GROUP'}
+                  Okta    {'OKTA_GROUP'}
+                  BuiltIn {'BUILT_IN'}
+                }
+  $search = if ($groupType) {
+              "type eq ""$groupType"""
+            }
+            elseif ($identity) {
+              "profile.name eq ""$identity"" or id eq ""$Identity"""
+            }
+            elseif ($groupType -and $identity) {
+              "type eq ""$groupType"" and (profile.name eq ""$identity"" or id eq ""$Identity"")"
+            }
+  $body         = [hashtable]::new()
+  $body.limit   = $limit
+  $body.search  = switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
+                    true  {$search.Replace('*','').Replace('profile.name eq','profile.name sw')}
+                    false {$search}
+                  }
 
-    #region Build the body of the web request
-    Write-Verbose 'Build the body of the web request'
-    $body         = [hashtable]::new()
-    if ($limit) {
-      $body.limit   = $Limit
-      Write-Debug "Limit: $([pscustomobject]$body.limit)"
-    }
-    $body.search = if ($groupType -and $name) {
-       "type eq ""$groupType"" and profile.name sw ""$name"""
-    }
-    elseif ($groupType -and -not $name) {
-      "type eq ""$groupType"""
-    }
-    elseif (-not $groupType -and $name) {
-      "profile.name sw ""$name"""
-    }
-    Write-Debug "Search: $([pscustomobject]$body.search)"
-    #endregion
-    #region Build the Web Request
-    $webRequest                 = [hashtable]::new()
-    $webRequest.Uri             = 
-    $webRequest.Body            = $body
-    $webRequest.Method          = 'GET'
-    $webRequest.Headers         = $headers
-    $webRequest.UseBasicParsing = $true
-    #endregion
-  }
-  process {
-    switch ($all) {
-      False {
-          $response = Invoke-WebRequest @webRequest
-          switch ($profile){
-            True  {(ConvertFrom-Json $response.Content).Profile}
-            False {ConvertFrom-Json $response.Content}
-          }
-        }
-      true {
-       do{
-          $response = Invoke-WebRequest @webRequest
-          $webRequest.Uri = $response.RelationLink.next #RelationLink is the recommended approach for pagination from Okta.
-          $webRequest.Remove('Body')
-          switch ($profile){
-            True  {(ConvertFrom-Json $response.Content).Profile}
-            False {ConvertFrom-Json $response.Content}
-          }
-        } until (-not $response.RelationLink.next)
-      }
-    }
-  }
-  end {
-    [system.gc]::Collect()
+  $oktaAPI          = [hashtable]::new()
+  $oktaAPI.Body     = $body
+  $oktaAPI.Endpoint = 'groups'
+  $oktaAPI.All      = $all
+
+  switch ($profile) {
+    True  {(Invoke-OktaAPI @oktaAPI).profile}
+    False {Invoke-OktaAPI @oktaAPI}
   }
 }
