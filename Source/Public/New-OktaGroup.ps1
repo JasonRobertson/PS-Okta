@@ -3,9 +3,7 @@ function New-OktaGroup {
   param(
     [parameter(Mandatory)]
     [string]$Name,
-    [string]$Description,
-    [ValidateSet('APP_Group','BUILT_IN','OKTA_GROUP')]
-    $Type = 'OKTA_GROUP'
+    [string]$Description
   )
   $body                     = [hashtable]::new()
   $body.type                = $Type
