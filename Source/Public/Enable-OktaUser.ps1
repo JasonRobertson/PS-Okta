@@ -6,22 +6,23 @@ function Enable-OktaUser {
     [string]$Identity,
     [switch]$SendEmail
   )
-  if ((Invoke-OktaAPI -EndPoint users/$identity).status -eq 'PROVISIONED') {
+  $oktaUser = Get-OktaUser -Identity $Identity -ErrorAction Stop
+  $userID = $oktaUser.ID
+  
+  if (($oktaUser).status -eq 'PROVISIONED') {
     Write-Warning "$identity is already activated"
   }
   else {
+    $endPoint = switch ($oktaUser.Status) {
+      Default   {"users/$userID/lifecycle/activate?sendEmail=$sendEmail"}
+      SUSPENDED {"users/$userID/lifecycle/unsuspend"}
+    }
+
     $oktaAPI          = [hashtable]::new()
     $oktaAPI.Method   = 'POST'
-    $oktaAPI.Endpoint = switch ($SendEmail) {
-      true  {"users/$identity/lifecycle/activate?sendEmail=true"}
-      false {"users/$identity/lifecycle/activate?sendEmail=false"}
-    }
-    try {
-      Invoke-OktaAPI @oktaAPI
-      Write-Host "Successfully activated $identity"
-    }
-    catch {
-      Write-Error $PSItem.Exception.Message
-    }
+    $oktaAPI.Endpoint = $endPoint
+    
+    Invoke-OktaAPI @oktaAPI
+    Write-Host -ForegroundColor Green -Object "Successfully enabled $identity"
   }
 }
