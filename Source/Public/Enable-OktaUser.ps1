@@ -24,7 +24,6 @@ function Enable-OktaUser {
 
     try {
       Invoke-OktaAPI @oktaAPI
-      Write-Host -ForegroundColor Green -Object "Successfully enabled $identity"
     }
     catch {
       Write-Error $PSITem.Exception.Message
