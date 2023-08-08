@@ -17,49 +17,55 @@ function Get-OktaUser {
     [parameter(ParameterSetName='Default')]
     [switch]$All
   )
-  $Endpoint = switch ($PSCmdlet.ParameterSetName) {
-    Default   {"users"}
-    Identity  {"users/$identity"}
+  begin {
+    $filterStatus = switch ($status) {
+      Active          {'status eq "ACTIVE"'}
+      Staged          {'status eq "STAGED"'}
+      Recovery        {'status eq "RECOVERY"'}
+      Locked          {'status eq "LOCKED_OUT"'}
+      Provisioned     {'status eq "PROVISIONED"'}
+      Deprovisioned   {'status eq "DEPROVISIONED"'}
+      PasswordExpired {'status eq "PASSWORD_EXPIRED"'}
+    }
+    If ($lastUpdated) {
+      $filterLastUpdated = "lastUpdated gt ""$(Get-Date $lastUpdated -Format yyyy-MM-ddThh:mm:ss.fffZ)"""
+    }
+    $body         = [hashtable]::new()
+    $body.limit   = $limit
+    $body.filter  = if ($filterStatus -and $LastUpdated){"$filterStatus and $filterLastUpdated" }
+                    elseif ($filterStatus) {$filterStatus}
+                    elseif ($filterLastUpdated) {$filterLastUpdated}
   }
-  $filterStatus = switch ($status) {
-    Active          {'status eq "ACTIVE"'}
-    Staged          {'status eq "STAGED"'}
-    Recovery        {'status eq "RECOVERY"'}
-    Locked          {'status eq "LOCKED_OUT"'}
-    Provisioned     {'status eq "PROVISIONED"'}
-    Deprovisioned   {'status eq "DEPROVISIONED"'}
-    PasswordExpired {'status eq "PASSWORD_EXPIRED"'}
+  process {
+    foreach ($userID in $Identity) {
+      $Endpoint = switch ($PSCmdlet.ParameterSetName) {
+        Default   {"users"}
+        Identity  {"users/$userID"}
+      }
+      $oktaAPI          = [hashtable]::new()
+      $oktaAPI.Method   = 'GET'
+      $oktaAPI.Body     = $body
+      $oktaAPI.All      = $all
+      $oktaAPI.Endpoint = $Endpoint
+    
+      try{
+        Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile
+      }
+      catch {
+        $message = "Failed to retrieve Okta User $userID, verify the ID matches one of the examples:
+                  ID:               00ub0oNGTSWTBKOLGLNR
+                  Login:            isaac.brock@example.com
+                  Login Shortname:  isaac.broc"
+    
+        $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+          [Exception]::new($message),
+          'ErrorID',
+          [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+          'Okta'
+        )
+        $pscmdlet.ThrowTerminatingError($errorRecord)
+      }  
+    }
   }
-  If ($lastUpdated) {
-    $filterLastUpdated = "lastUpdated gt ""$(Get-Date $lastUpdated -Format yyyy-MM-ddThh:mm:ss.fffZ)"""
-  }
-  $body         = [hashtable]::new()
-  $body.limit   = $limit
-  $body.filter  = if ($filterStatus -and $LastUpdated){"$filterStatus and $filterLastUpdated" }
-                  elseif ($filterStatus) {$filterStatus}
-                  elseif ($filterLastUpdated) {$filterLastUpdated}
-
-  $oktaAPI          = [hashtable]::new()
-  $oktaAPI.Method   = 'GET'
-  $oktaAPI.Body     = $body
-  $oktaAPI.All      = $all
-  $oktaAPI.Endpoint = $Endpoint
-
-  try{
-    Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile
-  }
-  catch {
-    $message = "Failed to retrieve Okta User: $identity, verify the ID matches one of the examples:
-              ID:               00ub0oNGTSWTBKOLGLNR
-              Login:            isaac.brock@example.com
-              Login Shortname:  isaac.broc"
-
-    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-      [Exception]::new($message),
-      'ErrorID',
-      [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-      'Okta'
-    )
-    $pscmdlet.ThrowTerminatingError($errorRecord)
-  }
+  end{}
 }
