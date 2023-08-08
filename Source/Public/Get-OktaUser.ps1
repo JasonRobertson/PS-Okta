@@ -2,8 +2,7 @@ function Get-OktaUser {
   [CmdletBinding(DefaultParameterSetName='Default')]
   param (
     # Identity is used to fetch a user by id, login, or login shortname if the short name is unambiguous
-    [parameter( ParameterSetName='Identity',
-                ValueFromPipeline=$true)]
+    [parameter( ParameterSetName='Identity', ValueFromPipeline=$true)]
     [string[]]$Identity,
     # Status parameter can be used to list users with a specific status.
     # You can select one or more Active, Provisioned, Deprovisioned, Staged, Recovered, Locked, PasswordExpired
@@ -12,7 +11,6 @@ function Get-OktaUser {
     [string]$Status,
     [parameter(ParameterSetName='Default')]
     [datetime]$LastUpdated,
-    [switch]$OktaProfile,
     [parameter(ParameterSetName='Default')]
     [validateRange(1,200)]
     [int]$Limit = 200,
@@ -37,7 +35,7 @@ function Get-OktaUser {
   }
   $body         = [hashtable]::new()
   $body.limit   = $limit
-  $body.filter  = if ($filterStatus -and $LastUpdated){ "$filterStatus and $filterLastUpdated" }
+  $body.filter  = if ($filterStatus -and $LastUpdated){"$filterStatus and $filterLastUpdated" }
                   elseif ($filterStatus) {$filterStatus}
                   elseif ($filterLastUpdated) {$filterLastUpdated}
 
@@ -47,9 +45,21 @@ function Get-OktaUser {
   $oktaAPI.All      = $all
   $oktaAPI.Endpoint = $Endpoint
 
-  $response = Invoke-OktaAPI @oktaAPI
-  switch ($oktaProfile){
-    true  {$response.Profile}
-    false {$response}
+  try{
+    Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile
+  }
+  catch {
+    $message = "Failed to retrieve Okta User: $identity, verify the ID matches one of the examples:
+              ID:               00ub0oNGTSWTBKOLGLNR
+              Login:            isaac.brock@example.com
+              Login Shortname:  isaac.broc"
+
+    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+      [Exception]::new($message),
+      'ErrorID',
+      [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+      'Okta'
+    )
+    $pscmdlet.ThrowTerminatingError($errorRecord)
   }
 }
