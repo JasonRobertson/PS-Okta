@@ -1,51 +1,45 @@
 function Add-OktaAppUser {
   [CmdletBinding()]
   param (
+    # Identity parameter accepts appId
+    # ID: 0oafxqCAJWWGELFTYASJ
     [parameter(Mandatory)]
-    [string]$AppID,
-    # UserId parameter accepts ID, Login or Login Shortname
+    [string]$Identity,
+    # Member parameter accepts ID, Login or Login Shortname
     # ID:               00ub0oNGTSWTBKOLGLNR
     # Login:            isaac.brock@example.com
     # Login Shortname:  isaac.brock
     [parameter(Mandatory)]
-    [string[]]$UserID
+    [string[]]$Member
   )
   begin {
-    #Verify the connection has been established
-    $oktaUrl = Test-OktaConnection
-    #region Build the headers
-    $headers                  = [hashtable]::new()
-    $headers.Accept           = 'application/json'
-    $headers.Authorization    = Convert-OktaAPIToken
-    #endregion
+    try {
+      $appID = (Get-OktaApp -Identity $Identity).id
+    }
+    catch {
+      
+    }
+    
   }
   process {
-    ForEach ($id in $userID){
+    foreach ($user in $member){
+      $oktaUser = Get-OktaUser -Identity $User
       Try {
-        #region Verify/Get Okta User ID
-        Try {
-          $oktaUser = Get-OktaUser -Identity $id
-        }
-        Catch {
-          Write-Warning "Failed to find $ID"
-          Write-Warning 'Failed to retrieve Okta User ID, verify the ID matches one of the examples:
-          ID:               00ub0oNGTSWTBKOLGLNR
-          Login:            isaac.brock@example.com
-          Login Shortname:  isaac.brock'
-        }
-        #endregion
         #region Add Okta user to Okta App
         Switch ($oktaUser.status){
           Default       {
-            #region Build the body
-            $body         = [hashtable]::new()
-            $body.id          = $oktaUser.Id
-            $body.scope       = 'USER'
-            #endregion
+            $oktaAPI            = [hashtable]::new()
+            $oktaAPI.Body       = [hashtable]::new()
+            $oktaAPI.Body.id    = $oktaUser.Id
+            $oktaAPI.Body.scope = 'USER'
+            $oktaAPI.Endpoint   = "apps/" 
+
+            Invoke-OktaAPI @oktaAPI
+
             #region Build the Rest Method
             Write-Verbose "Build RestMethod Params: Start"
             $webRequest             = [hashtable]::new()
-            $webRequest.Uri         = "$oktaUrl/apps/$appId/users"
+            $webRequest.Uri         = "$oktaUrl/apps/$Identity/users"
             $webRequest.Body        = ConvertTo-JSON $body
             $webRequest.Method      = 'POST'
             $webRequest.Headers     = $headers

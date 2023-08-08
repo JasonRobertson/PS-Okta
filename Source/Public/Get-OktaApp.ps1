@@ -27,7 +27,7 @@ function Get-OktaApp {
   $oktaAPI.Endpoint     = 'apps'
   
   switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
-    $true  {Invoke-OktaAPI @oktaAPI}
-    $false {(Invoke-OktaAPI @oktaAPI).where({$_.Label -eq $Identity -or $_.ID -eq $Identity})}
+    True  {Invoke-OktaAPI @oktaAPI}
+    False {(Invoke-OktaAPI @oktaAPI).where({$_.Label -eq $Identity -or $_.ID -eq $Identity})}
   }
 }
