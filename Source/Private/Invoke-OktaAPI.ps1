@@ -30,7 +30,7 @@ function Invoke-OktaAPI {
     Invoke-RestMethod @restMethod
   }
   catch {
-    $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.trim('Not found: ')
+    $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.TrimStart('Not found: ')
     Write-OktaError -Message $message
   }
 }
