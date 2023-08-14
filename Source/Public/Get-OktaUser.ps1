@@ -37,34 +37,41 @@ function Get-OktaUser {
                     elseif ($filterLastUpdated) {$filterLastUpdated}
   }
   process {
-    foreach ($userID in $Identity) {
-      $Endpoint = switch ($PSCmdlet.ParameterSetName) {
-        Default   {"users"}
-        Identity  {"users/$userID"}
+    switch ($PSCmdlet.ParameterSetName) {
+      Default {
+        $oktaAPI          = [hashtable]::new()
+        $oktaAPI.Method   = 'GET'
+        $oktaAPI.Body     = $body
+        $oktaAPI.All      = $all
+        $oktaAPI.Endpoint = 'users'
+        (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
       }
-      $oktaAPI          = [hashtable]::new()
-      $oktaAPI.Method   = 'GET'
-      $oktaAPI.Body     = $body
-      $oktaAPI.All      = $all
-      $oktaAPI.Endpoint = $Endpoint
-    
-      try{
-        Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+      Identity {
+        foreach ($userID in $Identity) {
+          $oktaAPI          = [hashtable]::new()
+          $oktaAPI.Method   = 'GET'
+          $oktaAPI.Body     = $body
+          $oktaAPI.All      = $all
+          $oktaAPI.Endpoint = "users/$userID"
+          try{
+            (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+          }
+          catch {
+            $message = "Failed to retrieve Okta User $userID, verify the ID matches one of the examples:
+                      ID:               00ub0oNGTSWTBKOLGLNR
+                      Login:            isaac.brock@example.com
+                      Login Shortname:  isaac.broc"
+        
+            $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+              [Exception]::new($message),
+              'ErrorID',
+              [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+              'Okta'
+            )
+            $pscmdlet.ThrowTerminatingError($errorRecord)
+          }  
+        }
       }
-      catch {
-        $message = "Failed to retrieve Okta User $userID, verify the ID matches one of the examples:
-                  ID:               00ub0oNGTSWTBKOLGLNR
-                  Login:            isaac.brock@example.com
-                  Login Shortname:  isaac.broc"
-    
-        $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-          [Exception]::new($message),
-          'ErrorID',
-          [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-          'Okta'
-        )
-        $pscmdlet.ThrowTerminatingError($errorRecord)
-      }  
     }
   }
   end{}
