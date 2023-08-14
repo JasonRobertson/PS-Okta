@@ -49,7 +49,7 @@ function Get-OktaUser {
       $oktaAPI.Endpoint = $Endpoint
     
       try{
-        Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile
+        Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, credentials, _links
       }
       catch {
         $message = "Failed to retrieve Okta User $userID, verify the ID matches one of the examples:
