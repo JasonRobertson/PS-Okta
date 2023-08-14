@@ -44,5 +44,21 @@ function Get-OktaGroup {
   $oktaAPI.Endpoint = 'groups'
   $oktaAPI.All      = $all
 
-  (Invoke-OktaAPI @oktaAPI) | Select-Object * -ExpandProperty profile -ExcludeProperty objectClass, profile, type,_links
+  $results = (Invoke-OktaAPI @oktaAPI) | Select-Object * -ExpandProperty profile -ExcludeProperty objectClass, profile, type,_links
+  switch (-not $results) {
+    True  {
+      $message = {"Failed to retrieve Okta group $identity, verify the ID matches one of the examples:"}.invoke()
+      $message.Add('ID:   00ub0oNGTSWTBKOLGLNR')
+      $message.Add('Name: Everyone')
+  
+      $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+        [Exception]::new(($message | Out-String)),
+        'ErrorID',
+        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+        'Okta'
+      )
+      $pscmdlet.ThrowTerminatingError($errorRecord)
+    }
+    False {$results}
+  }
 }
