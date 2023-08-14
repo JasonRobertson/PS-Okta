@@ -12,5 +12,5 @@ function Get-OktaUserGroup {
   $oktaAPI.Body.Limit = $Limit
   $oktaAPI.Endpoint   = "users/$identity/groups"
 
-  Invoke-OktaAPI @oktaAPI
+  (Invoke-OktaAPI @oktaAPI).profile
 }
