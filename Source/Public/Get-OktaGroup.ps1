@@ -16,7 +16,6 @@ function Get-OktaGroup {
     [int]$Limit = 10000,
     # Profile is a switch parameter used to only return the profile of the object.
     [alias('GroupProfile')]
-    [switch]$Profile,
     [switch]$All
   )
   $groupType  = switch ($type) {
@@ -45,8 +44,5 @@ function Get-OktaGroup {
   $oktaAPI.Endpoint = 'groups'
   $oktaAPI.All      = $all
 
-  switch ($profile) {
-    True  {(Invoke-OktaAPI @oktaAPI).profile}
-    False {Invoke-OktaAPI @oktaAPI}
-  }
+  (Invoke-OktaAPI @oktaAPI) | Select-Object * -ExpandProperty profile -ExcludeProperty objectClass, profile, type,_links
 }
