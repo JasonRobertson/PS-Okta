@@ -37,21 +37,18 @@ function Get-OktaUser {
                     elseif ($filterLastUpdated) {$filterLastUpdated}
   }
   process {
+    $oktaAPI          = [hashtable]::new()
+    $oktaAPI.Method   = 'GET'
+    $oktaAPI.Body     = $body
+    $oktaAPI.All      = $all
+
     switch ($PSCmdlet.ParameterSetName) {
       Default {
-        $oktaAPI          = [hashtable]::new()
-        $oktaAPI.Method   = 'GET'
-        $oktaAPI.Body     = $body
-        $oktaAPI.All      = $all
         $oktaAPI.Endpoint = 'users'
         (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
       }
       Identity {
         foreach ($userID in $Identity) {
-          $oktaAPI          = [hashtable]::new()
-          $oktaAPI.Method   = 'GET'
-          $oktaAPI.Body     = $body
-          $oktaAPI.All      = $all
           $oktaAPI.Endpoint = "users/$userID"
           try{
             (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
