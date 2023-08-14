@@ -18,9 +18,9 @@ function Add-OktaAppUser {
     if ($appID) {
       foreach ($user in $member){
         $oktaUser = Get-OktaUser -Identity $User
-        Switch ($oktaUser.status){
+        switch ($oktaUser.status){
           DEPROVISIONED {
-            Write-Warning "$ID is deprovisioned, skipping user"
+            Write-Warning "User $user is deprovisioned, skipping user"
           }
           Default { 
             $oktaAPI            = [hashtable]::new()
