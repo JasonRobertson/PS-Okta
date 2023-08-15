@@ -19,26 +19,28 @@ function Get-OktaGroupRule {
   
   $response = (Invoke-OktaAPI @oktaApi)
 
-  foreach ($groupRule in $response) {
-    $assingedToGroups = switch ($MapGroupName) {
-      False { $groupRule.actions.assignUserToGroups.groupIds }
-      True  { 
-        foreach ($groupID in $groupRule.actions.assignUserToGroups.groupIds){
-          -join ($groupRule._embedded.groupIdToGroupNameMap.$($groupID), ' [', $groupID,']')
+  if ($response) {
+    foreach ($groupRule in $response) {
+      $assingedToGroups = switch ($MapGroupName) {
+        False { $groupRule.actions.assignUserToGroups.groupIds }
+        True  { 
+          foreach ($groupID in $groupRule.actions.assignUserToGroups.groupIds){
+            -join ($groupRule._embedded.groupIdToGroupNameMap.$($groupID), ' [', $groupID,']')
+          }
         }
       }
-    }
-
-    [PSCustomObject][Ordered]@{
-      Name              = $groupRule.Name
-      ID                = $groupRule.ID
-      Status            = $groupRule.Status
-      Conditions        = $groupRule.conditions.expression.value
-      AssignedToGroups  = $assingedToGroups
-      ExcludeUsers      = $groupRule.conditions.people.users.exclude
-      ExcludeGroups     = $groupRule.conditions.people.groups.exclude
-      Created           = $groupRule.Created
-      LastUpdated       = $groupRule.LastUpdated
+  
+      [PSCustomObject][Ordered]@{
+        Name              = $groupRule.Name
+        ID                = $groupRule.ID
+        Status            = $groupRule.Status
+        Conditions        = $groupRule.conditions.expression.value
+        AssignedToGroups  = $assingedToGroups
+        ExcludeUsers      = $groupRule.conditions.people.users.exclude
+        ExcludeGroups     = $groupRule.conditions.people.groups.exclude
+        Created           = $groupRule.Created
+        LastUpdated       = $groupRule.LastUpdated
+      }
     }
   }
 }
