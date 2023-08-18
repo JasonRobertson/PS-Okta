@@ -25,12 +25,17 @@ function Get-OktaApp {
   $oktaAPI.Body.filter  = $filter
   $oktaAPI.Endpoint     = 'apps'
   
-  $response = switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
-    True  {Invoke-OktaAPI @oktaAPI}
-    False {(Invoke-OktaAPI @oktaAPI).where({$_.Label -eq $Identity -or $_.ID -eq $Identity})}
-  }
+  $response = Invoke-OktaAPI @oktaAPI
   if ($response) {
-    $response
+    if ($identity) {
+      switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
+        True    {$response.where({$_.Label -like $Identity -or $_.ID -like $Identity})}
+        False   {$response.where({$_.Label -eq $Identity -or $_.ID -eq $Identity})}
+      }
+    }
+    else {
+      $response
+    }
   }
   else {
     $message = "Failed to retrieve Okta App $identity, verify the ID matches one of the examples:
