@@ -31,6 +31,13 @@ function Invoke-OktaAPI {
   }
   catch {
     $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.TrimStart('Not found: ')
-    Write-OktaError -Message $message
+    #Write-OktaError -Message $message
+    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+      [Exception]::new($message),
+      'ErrorID',
+      [System.Management.Automation.ErrorCategory]::NotSpecified,
+      'Okta'
+    )
+    $pscmdlet.ThrowTerminatingError($errorRecord)
   }
 }
