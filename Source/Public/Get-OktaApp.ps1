@@ -38,13 +38,13 @@ function Get-OktaApp {
     }
   }
   else {
-    $message = "Failed to retrieve Okta App $identity, verify the ID matches one of the examples:
-    ID            : 0oa786gznlVSf15sC5d7
-    Name          : okta_enduser
-    Label         : Okta Dashboard"
+    $message = {"Failed to retrieve Okta App $identity, verify the ID matches one of the examples:"}.invoke()
+    $message.Add('ID:     0oa786gznlVSf15sC5d7')
+    $message.Add('Name:   okta_enduser')
+    $message.Add('Label:  Okta Dashboard')
 
     $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-    [Exception]::new($message),
+    [Exception]::new(($message | Out-String)),
     'ErrorID',
     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
     'Okta'
