@@ -4,7 +4,7 @@ foreach ($module in $modules) {
     Get-InstalledModule -Name $module -ErrorAction Stop
   }
   catch {
-    Write-Host "Installing $module"
+    Write-Information "Installing $module" -InformationAction Continue
     Install-Module -Name $module -Force
   }
 }
