@@ -1,5 +1,5 @@
 function Get-OktaAppCertificate {
-  [CmdletBinding()]
+  [CmdletBinding(DefaultParameterSetName='Default')]
   param (
     [parameter(Mandatory)]
     [string]$Identity,
@@ -11,8 +11,8 @@ function Get-OktaAppCertificate {
     if ($appID) {
       $oktaAPI          = [hashtable]::new()
       $oktaAPI.Endpoint = switch ($PSCmdlet.ParameterSetName) {
-        KeyID   {"apps/$identity/credentials/keys/$key"}
-        Default {"apps/$identity/credentials/keys"}
+        KeyID   {"apps/$appId/credentials/keys/$key"}
+        Default {"apps/$appId/credentials/keys"}
       }
       Invoke-OktaAPI @oktaAPI
     }
