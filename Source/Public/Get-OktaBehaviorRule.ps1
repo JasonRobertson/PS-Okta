@@ -7,23 +7,28 @@ function Get-OktaBehaviorRule {
     [parameter(ParameterSetName='Type')]
     [string]$Type
   )
+  $filterType = switch ($type) {
+    IP        {'Anomalous_IP'}
+    Device    {'Anomalous_Device'}
+    Location  {'Anomalous_Location'}
+    Velocity  {'Velocity'}
+  }
   $oktaAPI          = [hashtable]::new()
-  $oktaAPI.EndPoint = switch ($null -eq $identity) {
-    True  {'behaviors'}
-    False {"behaviors/$identity"}
-  }
+  $oktaAPI.EndPoint = 'behaviors'
+  
+  $response = Invoke-OktaAPI @oktaAPI
 
-  $response = if ($type) {
-    $filterType = switch ($type) {
-      IP        {'Anomalous_IP'}
-      Device    {'Anomalous_Device'}
-      Location  {'Anomalous_Location'}
-      Velocity  {'Velocity'}
+  $filterResponse = switch ($PSCmdlet.ParameterSetName) {
+    type    {$response.where({$_.type -eq $filterType})}
+    default {
+      if ($identity) {
+        switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
+          True  {$response.where({$_.name -like $Identity -or $_.ID -like $Identity})}
+          False {$response.where({$_.name -eq $Identity -or $_.ID -eq $Identity})}
+        }
+      }
+      else { $response }
     }
-    (Invoke-OktaAPI @oktaAPI).where({$_.type -eq $filterType})
   }
-  else {
-    Invoke-OktaAPI @oktaAPI
-  }
-  $response | Select-Object -Property * -ExpandProperty Settings -ExcludeProperty Settings, _links
+  $filterResponse | Select-Object -Property * -ExpandProperty Settings -ExcludeProperty Settings, _links
 }
