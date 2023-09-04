@@ -60,7 +60,7 @@ function New-OktaBehaviorRule {
           }
         }
       }
-      $dynamicParameters | New-DynamicParameterNew
+      $dynamicParameters | New-DynamicParameter
     }
     process {
       $settings = [hashtable]::new()
