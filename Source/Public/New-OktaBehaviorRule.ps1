@@ -2,6 +2,7 @@ function New-OktaBehaviorRule {
   [CmdletBinding()]
   param (
     [Parameter(Mandatory,Position=0)]
+    [ValidateLength(1,128)]
     [string]$Name,
     [ValidateSet('Active','Inactive')]
     [parameter(Position=1)]
