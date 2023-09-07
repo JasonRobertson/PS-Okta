@@ -16,7 +16,7 @@ function Get-OktaBehaviorRuleParameters {
       $maxEvents.Name           = 'MaxEvents'
       $maxEvents.Type           = 'Int32'       
       $maxEvents.ValidateRange  = 1, 100
-      $maxEvents.Position       = 3
+      $maxEvents.Position       = 4
 
       $dynamicParameters.Add([PSCustomObject]$maxEvents)
 
@@ -24,7 +24,7 @@ function Get-OktaBehaviorRuleParameters {
       $minEvents.Name           = 'MinEvents'
       $minEvents.Type           = 'Int32'       
       $minEvents.ValidateRange  = 0, 10
-      $minEvents.Position       = 3
+      $minEvents.Position       = 5
 
       $dynamicParameters.Add([PSCustomObject]$minEvents)
 
@@ -33,7 +33,7 @@ function Get-OktaBehaviorRuleParameters {
         $granularity.Name         = 'Granularity'
         $granularity.Type         = 'String'
         $granularity.ValidateSet  = 'City', 'County', 'Lat_Long', 'Subdivision'
-        $granularity.Position     = 4
+        $granularity.Position     = 6
 
         $dynamicParameters.Add([pscustomobject]$granularity)
 
@@ -41,7 +41,7 @@ function Get-OktaBehaviorRuleParameters {
         $radiusKilometers.Name          = 'RadiusKilometers'
         $radiusKilometers.Type          = 'int32'
         $radiusKilometers.ValidateRange = 1, 1000
-        $radiusKilometers.Position      = 5
+        $radiusKilometers.Position      = 7
         $radiusKilometers.DefaultValue  = 20
 
         $dynamicParameters.Add([pscustomobject]$radiusKilometers)
