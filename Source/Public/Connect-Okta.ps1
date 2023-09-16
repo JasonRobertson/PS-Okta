@@ -69,23 +69,21 @@ function Connect-Okta {
       $requestor = Invoke-RestMethod @restMethod
       If ($requestor){
         $status = switch ($Preview) {
-          True  { "Connected successfully to $domain Okta Preview" }
-          False { "Connected successfully to $domain Okta" }
+          True  { "Connected successfully to $domain Okta Preview instance" }
+          False { "Connected successfully to $domain Okta instanace" }
         }
 
         Write-Host -ForegroundColor Green $status
 
-        [PSCustomObject][ordered]@{
-          Organization = $domain
-          Requestor    = $requestor.profile.login
-        } | Format-List
-
         #Global Scope is necesary to provide the value for other commands
         $script:connectionOkta = [pscustomobject][ordered]@{
-          URI       = $uri
-          ApiToken  = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
-          ActorID   = $requestor.Id
+          Organization  = $domain
+          URI           = $uri
+          ApiToken      = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
+          User          = $requestor.profile.login
+          ID            = $requestor.Id 
         }
+        $connectionOkta | Format-List Organization, User
       }
     }
     catch {
