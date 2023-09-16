@@ -4,13 +4,14 @@ function Disable-OktaBehaviorRule {
     [string]$Identity
   )
   if ([wildcardpattern]::ContainsWildcardCharacters($identity)){
-    $message = {}.invoke()
-    $message.Add('Wildcard is not supported; verify the identity matches one of the examples:')
-    $message.Add('ID:   0oa786gznlVSf15sC5d7')
-    $message.Add('Name: Velocity')
+    $message = {
+      'Wildcard is not supported; verify the identity matches one of the examples:'
+      'ID:   0oa786gznlVSf15sC5d7'
+      'Name: Velocity'
+    }.invoke() | Out-String
 
     $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-    [Exception]::new(($message | Out-String)),
+    [Exception]::new($message),
     'ErrorID',
     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
     'Okta'
