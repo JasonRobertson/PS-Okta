@@ -42,16 +42,16 @@ function Get-OktaUser {
     $oktaAPI.Body     = $body
     $oktaAPI.All      = $all
 
-    switch ($PSCmdlet.ParameterSetName) {
+    $response = switch ($PSCmdlet.ParameterSetName) {
       Default {
         $oktaAPI.Endpoint = 'users'
-        (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+        Invoke-OktaAPI @oktaAPI
       }
       Identity {
         foreach ($userID in $Identity) {
           $oktaAPI.Endpoint = "users/$userID"
           try{
-            (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+            Invoke-OktaAPI @oktaAPI
           }
           catch {
             $message = {"Failed to retrieve Okta User $userID, verify the ID matches one of the examples:"}.invoke()
@@ -69,6 +69,9 @@ function Get-OktaUser {
           }  
         }
       }
+    }
+    foreach ($entry in $response) {
+      $entry | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
     }
   }
   end{}
