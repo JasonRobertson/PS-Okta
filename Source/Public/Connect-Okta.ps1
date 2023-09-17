@@ -60,13 +60,18 @@ function Connect-Okta {
 
     $restMethod             = [hashtable]::new()
     $restMethod.Method      = 'GET'
-    $restMethod.Uri         = "$uri/users/me"
     $restMethod.Headers     = $headers
     $restMethod.ContentTYpe = 'application/json'
   }
   process {
     try {
-      $requestor = Invoke-RestMethod @restMethod
+      # Retrieve the Okta Profile associated with the token
+      $restMethod.Uri = "$uri/users/me"
+      $requestor      = Invoke-RestMethod @restMethod
+
+      # Retrieve the Okta Organization Settings with the token. 
+      $restMethod.Uri = "$uri/org"
+      $organization   = Invoke-RestMethod @restMethod
       If ($requestor){
         $status = switch ($Preview) {
           True  { "Connected successfully to $domain Okta Preview instance" }
@@ -77,13 +82,14 @@ function Connect-Okta {
 
         #Global Scope is necesary to provide the value for other commands
         $script:connectionOkta = [pscustomobject][ordered]@{
-          Organization  = $domain
+          CompanyName   = $organization.CompanyName
+          SubDomain     = $organization.SubDomain
           URI           = $uri
           ApiToken      = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
           User          = $requestor.profile.login
           ID            = $requestor.Id 
         }
-        $connectionOkta | Format-List Organization, User
+        $connectionOkta | Format-List CompanyName, Subdomain, User, ID
       }
     }
     catch {
