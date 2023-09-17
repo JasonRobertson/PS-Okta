@@ -9,7 +9,7 @@ function Invoke-OktaAPI {
     [switch]$All
   )
   #Verify the connection has been established
-  $oktaUrl = Test-OktaConnection
+  $oktaURI = (Get-OktaConnection).Uri
 
   $body = switch ($Method -match '^GET|DELETE$' ) {
     True  {$body}
@@ -17,7 +17,7 @@ function Invoke-OktaAPI {
   }
 
   $restMethod                       = [hashtable]::new()
-  $restMethod.Uri                   = "$oktaUrl/$Endpoint"
+  $restMethod.Uri                   = "$oktaURI/$endpoint"
   $restMethod.Body                  = $body
   $restMethod.Method                = $method
   $restMethod.ContentType           = 'application/json'
