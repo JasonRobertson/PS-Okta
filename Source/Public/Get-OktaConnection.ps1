@@ -6,6 +6,6 @@ function Get-OktaConnection {
     break
   }
   else {
-    $connectionOkta | Format-List Organization, User, ID
+    $connectionOkta | Format-List Organization, URI, User, ID
   }
 }
