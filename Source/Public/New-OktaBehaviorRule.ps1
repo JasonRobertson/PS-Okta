@@ -15,21 +15,39 @@ function New-OktaBehaviorRule {
       $dynamicParameters = {}.invoke()
       switch -wildcard ($type) {
         Velocity {
-          $velocityKPH               = [hashtable]::new()
-          $velocityKPH.Name          = 'VelocityKPH'
-          $velocityKPH.Type          = 'Int32'
-          $velocityKPH.ValidateRange = 1, 40075
-          $velocityKPH.Position      = 3
-          $velocityKPH.DefaultValue  = 20
+          $velocity                  = [hashtable]::new()
+          $velocity.Name             = 'VelocityKPH'
+          $velocity.Type             = 'Int32'
+          $velocity.Position         = 3
+          $velocity.ValidateRange    = 1, 40075
 
-          $dynamicParameters.Add([PSCustomObject]$velocityKPH)
+          $dynamicParameters.Add([PSCustomObject]$velocity)
         }
         default {
+          if ($type -eq 'Location') {
+            $location                  = [hashtable]::new()
+            $location.Name             = 'Granularity'
+            $location.Type             = 'String'
+            $location.Position         = 3
+            $location.Mandatory        = $true
+            $location.ValidateSet      = 'City', 'Country', 'Lat_Long', 'Subdivision'
+
+            $dynamicParameters.Add([pscustomobject]$location)
+
+            $radius               = [hashtable]::new()
+            $radius.Name          = 'RadiusKilometers'
+            $radius.Type          = 'int32'
+            $radius.ValidateRange = 5, 1000
+            $radius.Position      = 4
+
+            $dynamicParameters.Add([pscustomobject]$radius)
+          }
+
           $maxEvents                = [hashtable]::new()          
           $maxEvents.Name           = 'MaxEvents'
           $maxEvents.Type           = 'Int32'       
           $maxEvents.ValidateRange  = 1, 100
-          $maxEvents.Position       = 3
+          $maxEvents.Position       = 5
 
           $dynamicParameters.Add([PSCustomObject]$maxEvents)
 
@@ -37,57 +55,42 @@ function New-OktaBehaviorRule {
           $minEvents.Name           = 'MinEvents'
           $minEvents.Type           = 'Int32'       
           $minEvents.ValidateRange  = 0, 10
-          $minEvents.Position       = 3
+          $minEvents.Position       = 6
 
           $dynamicParameters.Add([PSCustomObject]$minEvents)
-
-          if ($type -eq 'Location') {
-            $granularity              = [hashtable]::new()
-            $granularity.Name         = 'Granularity'
-            $granularity.Type         = 'String'
-            $granularity.ValidateSet  = 'City', 'County', 'Lat_Long', 'Subdivision'
-            $granularity.Position     = 4
-
-            $dynamicParameters.Add([pscustomobject]$granularity)
-
-            $radiusKilometers               = [hashtable]::new()
-            $radiusKilometers.Name          = 'RadiusKilometers'
-            $radiusKilometers.Type          = 'int32'
-            $radiusKilometers.ValidateRange = 1, 1000
-            $radiusKilometers.Position      = 5
-            $radiusKilometers.DefaultValue  = 20
-
-            $dynamicParameters.Add([pscustomobject]$radiusKilometers)
-          }
         }
       }
       $dynamicParameters | New-DynamicParameter
     }
     process {
       $settings = [hashtable]::new()
+
+
       switch ($type) {
         Velocity {
-          $settings.velocityKph = if ($PSBoundParameters['VelocityKPH']) {
-            $PSBoundParameters['VelocityKPH']
-          } 
-          else {
-            805
+          $settings.velocityKph = switch ($null -eq $PSBoundParameters['VelocityKPH']) {
+            true  {805}
+            false {$PSBoundParameters['VelocityKPH']}
           }
         }
         default {
-          if ($type -eq 'Location') {
-            $settings.granularity       = ($PSBoundParameters['Granularity']).ToUpper()
-            if ($PSBoundParameters['Granularity'] -eq 'Lat_Long') {
-              $settings.radiusKilometers  = if ($PSBoundParameters['RadiusKilometers']) {$PSBoundParameters['RadiusKilometers']} else {20}
+          switch ($PSBoundParameters.Keys) {
+            Granularity       {$settings.granularity                  = $PSBoundParameters['Granularity'].ToUpper()}
+            MinEvents         {$settings.minEventsNeededForEvaluation = $PSBoundParameters['MinEvents']}
+            MaxEvents         {$settings.maxEventsUsedForEvaluation   = $PSBoundParameters['MaxEvents']}
+          }
+          if ($PSBoundParameters['Granularity'] -eq 'Lat_Long') {
+            $settings.radiusKilometers = switch ($nulle -eq $PSBoundParameters['RadiusKilometers']) {
+              true {20}
+              false {$PSBoundParameters['RadiusKilometers']}
             }
           }
-          $settings.maxEventsUsedForEvaluation = if ($PSBoundParameters['MaxEvents']) {$PSBoundParameters['MaxEvents']} else {20}
-          $settings.minEventsUsedForEvaluation = if ($PSBoundParameters['MinEvents']) {$PSBoundParameters['MinEvents']} else {0}
         }
       }
+
       $global:oktaAPI         = [hashtable]::new()
       $oktaAPI.Body           = [hashtable]::new()
-      $oktaAPI.Body.name      = $PSBoundParameters['Name']
+      $oktaAPI.Body.name      = $name
       $oktaAPI.Body.type      = switch ($type) {
                                   IP        {'ANOMALOUS_IP'}
                                   Device    {'ANOMALOUS_DEVICE'}
@@ -97,6 +100,11 @@ function New-OktaBehaviorRule {
       $oktaAPI.Body.settings  = $settings
       $oktaAPI.Method         = 'POST'
       $oktaAPI.EndPoint       = 'behaviors'
-      (Invoke-OktaAPI @oktaAPI) | Select-Object -ExpandProperty Settings -Property * -ExcludeProperty Settings, _links
+      try {      
+        (Invoke-OktaAPI @oktaAPI) | Select-Object -ExpandProperty Settings -Property * -ExcludeProperty Settings, _links
+      }
+      catch {
+        Write-Error $_.Exception.Message
+      }
     }
 }
