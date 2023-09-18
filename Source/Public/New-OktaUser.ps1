@@ -18,9 +18,11 @@ function New-OktaUser {
     #Casual way to address the user in real life
     [string]$NickName,
     #Name of the user, suitable for display to end users
+    [parameter(Mandatory)]
     [string]$DisplayName,
     #Primary email address of the user
     [ValidateLength(5,100)]
+    [parameter(Mandatory)]
     [string]$Email,
     #SecondEmail address of the user typically used for account recovery
     [string]$SecondEmail,
@@ -112,6 +114,11 @@ function New-OktaUser {
   $oktaAPI.Body     = $body
   $oktaAPI.Method   = 'POST'
   $oktaAPI.Endpoint = "/users"
-
-  Invoke-OktaAPI @oktaAPI
+  try {
+    Invoke-OktaAPI @oktaAPI
+  }
+  catch {
+    Write-Error $_.Exception.Message
+  }
+  
 }
