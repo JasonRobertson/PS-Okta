@@ -120,5 +120,4 @@ function New-OktaUser {
   catch {
     Write-Error $_.Exception.Message
   }
-  
 }
