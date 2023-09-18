@@ -1,4 +1,4 @@
-function Push-OktaSupportAccess {
+function Expand-OktaSupportAccess {
   [cmdletbinding()]
   param()
   $oktaAPI          = [hashtable]::new()
