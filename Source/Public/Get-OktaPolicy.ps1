@@ -1,4 +1,4 @@
-function Get-OktaPolicies {
+function Get-OktaPolicy {
   [cmdletbinding()]
   param(
     [validateSet('Access Policy','IDP Discovery','MFA Enroll','Okta Sign On','Password','Profile Enrollment')]
