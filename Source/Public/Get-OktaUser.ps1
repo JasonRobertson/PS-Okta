@@ -2,7 +2,7 @@ function Get-OktaUser {
   [CmdletBinding(DefaultParameterSetName='Default')]
   param (
     # Identity is used to fetch a user by id, login, or login shortname if the short name is unambiguous
-    [parameter( ParameterSetName='Identity', ValueFromPipeline=$true)]
+    [parameter(Position=0,ParameterSetName='Identity', ValueFromPipeline=$true)]
     [string[]]$Identity,
     # Status parameter can be used to list users with a specific status.
     # You can select one or more Active, Provisioned, Deprovisioned, Staged, Recovered, Locked, PasswordExpired
@@ -54,13 +54,14 @@ function Get-OktaUser {
             Invoke-OktaAPI @oktaAPI
           }
           catch {
-            $message = {"Failed to retrieve Okta User $userID, verify the ID matches one of the examples:"}.invoke()
-            $message.Add('ID:               00ub0oNGTSWTBKOLGLNR')
-            $message.Add('Login:            isaac.brock@example.com')
-            $message.Add('Login Shortname:  isaac.broc')
-        
+            $message = {
+              "Failed to retrieve Okta User $userID, verify the ID matches one of the examples:"
+              'ID:              00ub0oNGTSWTBKOLGLNR'
+              'Login:           isaac.brock@example.com'
+              'Login Shortname: isaac.broc'
+            }.invoke() | Out-String      
             $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-              [Exception]::new(($message | Out-String)),
+              [Exception]::new($message),
               'ErrorID',
               [System.Management.Automation.ErrorCategory]::ObjectNotFound,
               'Okta'
