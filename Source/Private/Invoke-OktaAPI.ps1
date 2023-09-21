@@ -31,7 +31,6 @@ function Invoke-OktaAPI {
   }
   catch {
     $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.TrimStart('Not found: ')
-    #Write-OktaError -Message $message
     $errorRecord = [System.Management.Automation.ErrorRecord]::new(
       [Exception]::new($message),
       'ErrorID',
