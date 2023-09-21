@@ -1,28 +1,37 @@
 function Get-OktaPolicy {
-  [cmdletbinding()]
+  [cmdletbinding(DefaultParameterSetName='List')]
   param(
+    [parameter(Position=0,ValueFromPipeline,ParameterSetName='Identity')]
+    [string]$Identity,
     [validateSet('Access Policy','IDP Discovery','MFA Enroll','Okta Sign On','Password','Profile Enrollment')]
-    [parameter(Mandatory)]
-    [string]$Type
+    [parameter(Mandatory,Position=0,ParameterSetName='List')]
+    [string]$Type,
+    [validateSet('Active','Inactive')]
+    [parameter(Position=1,ParameterSetName='List')]
+    [string]$Status
   )
-
-  $oktaAPI = [hashtable]::new()
-  $oktaAPI.Body = [hashtable]::new()
-  $oktaAPI.Body.type = switch ($type) {
-    'Access Policy'       {'ACCESS_POLICY'}
-    'IDP Discovery'       {'IDP_DISCOVERY'}
-    'MFA Enroll'          {'MFA_ENROLL'}
-    'Okta Sign On'        {'OKTA_SIGN_ON'}
-    'Password'            {'PASSWORD'}
-    'Profile Enrollment'  {'PROFILE_ENROLLMENT'}
+  begin {          
+    $oktaAPI      = [hashtable]::new()
+    $oktaAPI.Body = [hashtable]::new()
   }
-  $oktaAPI.Endpoint = 'policies'
-
-  try {
-    Invoke-OktaAPI @oktaAPI
+  process {
+    switch ($PSCmdlet.ParameterSetName) {
+      Identity { 
+        $oktaAPI.Endpoint = "policies/$identity" 
+      }
+      List {
+        $oktaAPI.Endpoint = 'policies'
+        switch ($PSBoundParameters.Keys) {
+          Type    {$oktaAPI.Body.type   = $type.Replace(' ','_').ToUpper()}
+          Status  {$oktaAPI.Body.status = $Status.ToUpper()}
+        }
+      }
+    }
+    try {
+      Invoke-OktaAPI @oktaAPI
+    }
+    catch {
+      Write-Error $PSItem.Exception.Message
+    }
   }
-  catch {
-    Write-Error $PSItem.Exception.Message
-  }
-  
 }
