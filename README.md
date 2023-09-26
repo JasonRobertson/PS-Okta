@@ -14,6 +14,10 @@ Is an unofficial module built for Okta Administrators who like to use PowerShell
 - Okta API Token
   - ***How to create Okta API token** [here](https://help.okta.com/oie/en-us/Content/Topics/Security/API.htm#create-okta-api-token)
 
+## Credits
+
+New-DynamicParameter.ps1 Credit to BeastMaster, jrich523 and ramblingcookiemonster  [Link](https://github.com/beatcracker/Powershell-Misc/blob/master/New-DynamicParameter.ps1)
+
 
 ## About ModuleBuilder
 
@@ -23,3 +27,4 @@ You can find source of ModuleBuilder [here](https://github.com/PoshCode/ModuleBu
 0.0.1 - Very first release \
 0.0.2 - Filename restructure \
 0.0.3 - Code revamp with helper functions
+0.0.4 - Additional functions
