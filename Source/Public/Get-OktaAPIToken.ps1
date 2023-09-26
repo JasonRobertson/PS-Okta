@@ -2,26 +2,21 @@ function Get-OktaAPIToken {
   [CmdletBinding()]
   param(
   [string]$Identity
-  )
-  $oktaAPI          = [hashtable]::new()
-  $oktaAPI.Endpoint = 'api-tokens'
-  
-
-  $response = Invoke-OktaAPI @oktaAPI
+  )  
+  $response = Invoke-OktaAPI -Endpoint api-tokens
   if ($identity) {
-    $filterResponse = switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
+    $response = switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
       True    {$response.where({$_.name -like $Identity -or $_.ID -like $Identity})}
       False   {$response.where({$_.name -eq $Identity -or $_.ID -eq $Identity})}
     }
-    if ($filterResponse) {$filterResponse}
-    else {
-      $message = {}.invoke()
-      $message.Add("Failed to retrieve Okta API Token $identity, verify the ID matches one of the examples:")
-      $message.Add('ID:   0oa786gznlVSf15sC5d7')
-      $message.Add('Name: Local Computer')
-  
+    if (-not $response) {
+      $message = {
+        "Failed to retrieve Okta API Token $identity, verify the ID matches one of the examples:"
+        'ID:   0oa786gznlVSf15sC5d7'
+        'Name: Local Computer'
+      }.invoke() | Out-String
       $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-      [Exception]::new(($message | Out-String)),
+      [Exception]::new($message),
       'ErrorID',
       [System.Management.Automation.ErrorCategory]::ObjectNotFound,
       'Okta'
@@ -29,7 +24,5 @@ function Get-OktaAPIToken {
       $pscmdlet.ThrowTerminatingError($errorRecord)
     }
   }
-  else {
-    $response
-  }
+  return $response
 }
