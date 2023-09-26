@@ -16,7 +16,7 @@ Is an unofficial module built for Okta Administrators who like to use PowerShell
 
 ## Credits
 
-New-DynamicParameter.ps1 Credit to BeastMaster, jrich523 and ramblingcookiemonster  [Link](https://github.com/beatcracker/Powershell-Misc/blob/master/New-DynamicParameter.ps1)
+New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster  [Here](https://github.com/beatcracker/Powershell-Misc/blob/master/New-DynamicParameter.ps1)
 
 
 ## About ModuleBuilder
