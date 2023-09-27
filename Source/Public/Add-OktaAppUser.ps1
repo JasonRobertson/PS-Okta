@@ -12,29 +12,32 @@ function Add-OktaAppUser {
     [parameter(Mandatory)]
     [string[]]$Member
   )
-  begin {}
   process {
-    $appID = (Get-OktaApp -Identity $Identity).id
-    if ($appID) {
-      foreach ($user in $member){
-        $oktaUser = Get-OktaUser -Identity $User
-        switch ($oktaUser.status){
-          DEPROVISIONED {
-            Write-Warning "User $user is deprovisioned, skipping user"
-          }
-          Default { 
-            $oktaAPI            = [hashtable]::new()
-            $oktaAPI.Body       = [hashtable]::new()
-            $oktaAPI.Body.id    = $oktaUser.Id
-            $oktaAPI.Body.scope = 'USER'
-            $oktaAPI.Method     = 'POST'
-            $oktaAPI.Endpoint   = "apps/$appid/users" 
-
-            Invoke-OktaAPI @oktaAPI
+    try {
+      $appID = (Get-OktaApp -Identity $Identity).id
+      if ($appID) {
+        foreach ($user in $member){
+          $oktaUser = Get-OktaUser -Identity $User
+          switch ($oktaUser.status){
+            DEPROVISIONED {
+              Write-Warning "User $user is deprovisioned, skipping user"
+            }
+            Default { 
+              $oktaAPI            = [hashtable]::new()
+              $oktaAPI.Body       = [hashtable]::new()
+              $oktaAPI.Body.id    = $oktaUser.Id
+              $oktaAPI.Body.scope = 'USER'
+              $oktaAPI.Method     = 'POST'
+              $oktaAPI.Endpoint   = "apps/$appid/users" 
+  
+              Invoke-OktaAPI @oktaAPI
+            }
           }
         }
       }
     }
+    catch {
+      Write-Error $PSItem.Exception.Message
+    }
   }
-  end {}
 }
