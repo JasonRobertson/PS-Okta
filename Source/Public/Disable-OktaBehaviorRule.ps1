@@ -24,7 +24,12 @@ function Disable-OktaBehaviorRule {
       $oktaAPI          = [hashtable]::new()
       $oktaAPI.Method   = 'POST'
       $oktaAPI.Endpoint = "behaviors/$behaviorID/lifecycle/deactivate"
-      (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty Settings -ExcludeProperty Settings, _links
+      try {
+        (Invoke-OktaAPI @oktaAPI) | Select-Object -Property * -ExpandProperty Settings -ExcludeProperty Settings, _links
+      }
+      catch {
+        Write-Error $PSItem.Exception.Message
+      }
     }
   }
 }
