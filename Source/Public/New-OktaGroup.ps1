@@ -16,5 +16,10 @@ function New-OktaGroup {
   $oktaAPI.Method   = 'POST'
   $oktaAPI.Endpoint = 'groups'
 
-  Invoke-OktaAPI @oktaAPI
+  try {
+    Invoke-OktaAPI @oktaAPI
+  }
+  catch {
+    Write-Error $PSItem.Exception.Message
+  }
 }
