@@ -1,4 +1,4 @@
-function Get-OktaDomains {
+function Get-OktaDomain {
   [cmdletbinding()]
   param(
     $Identity
