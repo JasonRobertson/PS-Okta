@@ -7,7 +7,8 @@ function Get-OktaDomain {
     $oktaAPI          = [hashtable]::new()
     $oktaAPI.Endpoint = 'domains'
 
-    $response = (Invoke-OktaAPI @oktaAPI).domains
+    # Required to complete _Links exclusion. Okta is returning the domains in a Domains list. 
+    $response = (Invoke-OktaAPI @oktaAPI).domains | Select-Object -ExcludeProperty _links
 
     $output = if ($identity) {
       switch ([wildcardpattern]::ContainsWildcardCharacters($identity)) {
