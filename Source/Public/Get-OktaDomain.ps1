@@ -18,7 +18,7 @@ function Get-OktaDomain {
     else {
       $response
     }
-    $output | Select-Object -ExcludeProperty _links
+    $output 
   }
   catch {
     Write-Error $PSItem.Exception.Message

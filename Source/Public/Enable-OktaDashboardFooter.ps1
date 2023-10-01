@@ -5,7 +5,7 @@ function Enable-OktaDashboardFooter {
     $oktaApi = [hashtable]::new()
     $oktaApi.Method = 'POST'
     $oktaApi.EndPoint = 'org/preferences/showEndUserFooter'
-    Invoke-OktaAPI @oktaApi  | Select-Object -ExcludeProperty _links
+    Invoke-OktaAPI @oktaApi
   }
   catch {
     Write-Error $PSItem.Exception.Message

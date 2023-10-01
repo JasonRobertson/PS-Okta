@@ -3,5 +3,5 @@ function Get-OktaSupportAccess {
   param()
   $oktaAPI          = [hashtable]::new()
   $oktaAPI.EndPoint = 'org/privacy/oktaSupport'
-  Invoke-OktaAPI @oktaAPI | Select-Object -ExcludeProperty _links
+  Invoke-OktaAPI @oktaAPI 
 }

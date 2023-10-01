@@ -24,7 +24,7 @@ function Get-OktaFeature {
       }
       foreach ($entry in $response) {
         $entry.stage = $entry.stage.value
-        $entry | Select-Object -ExcludeProperty _links
+        $entry 
       }
     }
     catch {

@@ -5,7 +5,7 @@ function Disable-OktaDashboardFooter {
     $oktaApi = [hashtable]::new()
     $oktaApi.Method = 'POST'
     $oktaApi.EndPoint = 'org/preferences/hideEndUserFooter'
-    Invoke-OktaAPI @oktaApi  | Select-Object -ExcludeProperty _links | Select-Object -ExcludeProperty _links
+    Invoke-OktaAPI @oktaApi
   }
   catch {
     Write-Error $PSItem.Exception.Message

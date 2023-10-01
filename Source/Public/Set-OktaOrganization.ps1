@@ -32,5 +32,5 @@ function Set-OktaOrganization {
   $oktaAPI.Body     = $body
   $oktaAPI.Method   = 'POST'
   $oktaAPI.EndPoint = 'org'
-  Invoke-OktaAPI @oktaAPI | Select-Object -ExcludeProperty _links
+  Invoke-OktaAPI @oktaAPI 
 }

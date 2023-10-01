@@ -16,7 +16,7 @@ function New-OktaDomain {
     $oktaAPI.Method                     = 'POST'
     $oktaAPI.Endpoint                   = 'domains'
     
-    Invoke-OktaAPI @oktaAPI | Select-Object -ExcludeProperty _links
+    Invoke-OktaAPI @oktaAPI 
   }
   catch {
     Write-Error $PSItem.Exception.Message

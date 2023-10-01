@@ -27,7 +27,11 @@ function Invoke-OktaAPI {
   $restMethod.FollowRelLink         = $all
 
   try {
-    Invoke-RestMethod @restMethod
+    $response = Invoke-RestMethod @restMethod
+
+    foreach ($entry in $response) {
+      $entry | Select-Object -ExcludeProperty _links
+    }
   }
   catch {
     $message = ($PSItem.ErrorDetails.Message | ConvertFrom-Json).errorSummary.TrimStart('Not found: ')

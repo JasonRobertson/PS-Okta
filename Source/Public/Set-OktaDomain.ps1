@@ -13,7 +13,7 @@ function Set-OktaDomain {
       $oktaAPI.Body.brandId = $BrandID
       $oktaAPI.Method       = 'PUT'
       $oktaAPI.Endpoint     = "domains/$Identity"
-      Invoke-OktaAPI @oktaAPI | Select-Object -ExcludeProperty _links
+      Invoke-OktaAPI @oktaAPI 
     }
     catch {
       Write-Error $PSItem.Exception.Message
