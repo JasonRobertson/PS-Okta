@@ -4,12 +4,15 @@ function Get-OktaAppUser {
     [parameter(Mandatory)]
     [string]$Identity,
     [string]$User,
+    [ValidateRange(1,500)]
+    [int]$Limit=500,
     [switch]$All
   )
   try {
     $oktaAPI          = [hashtable]::new()
     $oktaAPI.Body     = [hashtable]::new()
     $oktaAPI.Body.q   = $user
+    $oktaAPI.Body.limit = $limit
     $oktaAPI.All      = $all
     $oktaAPI.Endpoint = "apps/$identity/users"
     Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Credentials -ExcludeProperty Credentials | Select-Object -ExpandProperty Profile -ExcludeProperty Profile
