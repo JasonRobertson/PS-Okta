@@ -9,12 +9,13 @@ function Get-OktaAppUser {
     [switch]$All
   )
   try {
-    $oktaAPI          = [hashtable]::new()
-    $oktaAPI.Body     = [hashtable]::new()
-    $oktaAPI.Body.q   = $user
+    $oktaAPI            = [hashtable]::new()
+    $oktaAPI.All        = $all
+    $oktaAPI.Body       = [hashtable]::new()
+    $oktaAPI.Body.q     = $user
     $oktaAPI.Body.limit = $limit
-    $oktaAPI.All      = $all
-    $oktaAPI.Endpoint = "apps/$identity/users"
+    $oktaAPI.Endpoint   = "apps/$identity/users"
+    
     Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Credentials -ExcludeProperty Credentials | Select-Object -ExpandProperty Profile -ExcludeProperty Profile
   }
   catch {
