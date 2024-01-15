@@ -1,17 +1,10 @@
 function Get-OktaAPIToken {
   [CmdletBinding()]
   param(
-  [string]$Identity,
-  [ValidateRange(1,200)]
-  [int32]$Limit = 20
+  [string]$Identity
   )
-  $oktaAPI            = [hashtable]::new()
-  $oktaAPI.Body       = [hashtable]::new()
-  $oktaAPI.Body.limit = $Limit
-  $oktaAPI.Body.q     = $Identity
-  $oktaAPI.Endpoint   = 'api-tokens'
 
-  $response = Invoke-OktaAPI @oktaAPI
+  $response = (Invoke-OktaAPI -Endpoint api-tokens).where({$_.id -eq $identity -or $_.name -like "*$Identity*"})
   
   if (-not $response) {
     $message = {
