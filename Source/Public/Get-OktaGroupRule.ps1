@@ -27,7 +27,7 @@ function Get-OktaGroupRule {
         False { $groupRule.actions.assignUserToGroups.groupIds }
         True  {
           foreach ($groupID in $groupRule.actions.assignUserToGroups.groupIds){
-            -join ($groupRule._embedded.groupIdToGroupNameMap.$($groupID), ' [', $groupID,']')
+            -join ($groupRule._embedded.groupIdToGroupNameMap.$($groupID))
           }
         }
       }
@@ -37,9 +37,9 @@ function Get-OktaGroupRule {
         id                = $groupRule.ID
         status            = $groupRule.Status
         conditions        = $groupRule.conditions.expression.value
-        assignedToGroups  = $assingedToGroups
-        excludeUsers      = $groupRule.conditions.people.users.exclude
-        excludeGroups     = $groupRule.conditions.people.groups.exclude
+        assignedToGroups  = {$assingedToGroups}.invoke()
+        excludeUsers      = {$groupRule.conditions.people.users.exclude}.invoke()
+        excludeGroups     = {$groupRule.conditions.people.groups.exclude}.invoke()
         created           = $groupRule.Created
         lastUpdated       = $groupRule.LastUpdated
       }
