@@ -1,7 +1,10 @@
 function Get-OktaGroupRule {
-  [CmdletBinding()]
-  param (
+  [CmdletBinding(DefaultParameterSetName='Search')]
+  param(
+    [parameter(ParameterSetName='Identity')]
     [string]$Identity,
+    [parameter(ParameterSetName='Search')]
+    [string]$Search,
     [ValidateRange(1,200)]
     [int]$Limit = 50,
     [switch]$MapGroupName,
@@ -13,8 +16,8 @@ function Get-OktaGroupRule {
   $oktaApi.Body         = [hashtable]::new()
   $oktaAPI.Body.limit   = $limit
   $oktaAPI.Body.expand  = if ($mapGroupName) {'groupIdToGroupNameMap'}
-  $oktaAPI.Body.search  = $Identity
-  $oktaApi.Endpoint     = "groups/rules"
+  $oktaAPI.Body.search  = $search
+  $oktaApi.Endpoint     = "groups/rules/$identity"
 
   $response = (Invoke-OktaAPI @oktaApi)
 
