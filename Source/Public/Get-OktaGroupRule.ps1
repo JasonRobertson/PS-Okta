@@ -43,6 +43,7 @@ function Get-OktaGroupRule {
     }
   }
   else {
-    Write-Warning "No Group Rule found with the keyword $identity"
+    $oktaError = Write-OktaError "No Group Rule found with the keyword $identity"
+    $pscmdlet.ThrowTerminatingError($oktaError) 
   }
 }
