@@ -56,9 +56,9 @@ function Set-OktaUser {
     #Country name component of the user's address (country)
     [string]$CountryCode,
     #Honorific prefix(es) of the user, or title in most Western languages
-    [string]$honorificPrefix,
+    [string]$HonorificPrefix,
     #Honorific suffix(es) of the user
-    [string]$honorificSuffix,
+    [string]$HonorificSuffix,
     #Mailing address component of the user's address
     [string]$PostAddress,
     #DisplayName of the user's manager
@@ -88,14 +88,15 @@ function Set-OktaUser {
   if ($Department)        {$payload.department        = $department}
   if ($CostCenter)        {$payload.costCenter        = $costCenter}
   if ($EmployeeNumber)    {$payload.employeeNumber    = $employeeNumber}
+  if ($PrimaryPhone)      {$payload.primaryPhone     = $primaryPhone}
   if ($MobilePhone)       {$payload.mobilePhone       = $mobilePhone}
   if ($StreetAddress)     {$payload.streetAddress     = $streetAddress}
   if ($City)              {$payload.city              = $city}
   if ($State)             {$payload.state             = $state}
   if ($ZipCode)           {$payload.zipCode           = $ZipCode}
   if ($CountryCode)       {$payload.countryCode       = $countryCode}
-  if ($honorificPrefix)   {$payload.honorificPrefix   = $honorificPrefix}
-  if ($honorificSuffix)   {$payload.honorificSuffix   = $honorificSuffix}
+  if ($HonorificPrefix)   {$payload.honorificPrefix   = $honorificPrefix}
+  if ($HonorificSuffix)   {$payload.honorificSuffix   = $honorificSuffix}
   if ($PostAddress)       {$payload.postAddress       = $postAddress}
   if ($Manager)           {$payload.manager           = $manager}
   if ($ManagerID)         {$payload.managerId         = $managerID}
