@@ -7,13 +7,20 @@ function Get-OktaGroupMember {
     [int]$Limit = 1000,
     [switch]$All
   )
-  $groupID = (Get-OktaGroup -Identity $Identity).id
+  Try {
+    $groupID = (Get-OktaGroup -Identity $Identity).id
+    if ($groupID) {
+      $oktaAPI            = [hashtable]::new()
+      $oktaAPI.All        = $all
+      $oktaAPI.Body       = [hashtable]::new()
+      $oktaAPI.Body.limit = $Limit
+      $oktaAPI.Endpoint   = "groups/$groupID/users"
+      
+      Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Profile -ExcludeProperty credentials, type, Profile
+    }
+  }
+  catch {
+    Write-Error $PSItem.Exception.Message
+  }
 
-  $oktaAPI            = [hashtable]::new()
-  $oktaAPI.All        = $all
-  $oktaAPI.Body       = [hashtable]::new()
-  $oktaAPI.Body.limit = $Limit
-  $oktaAPI.Endpoint   = "groups/$groupID/users"
-
-  Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Profile -ExcludeProperty credentials, type, Profile
 }
