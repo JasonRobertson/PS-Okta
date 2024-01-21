@@ -16,6 +16,4 @@ function Get-OktaGroupMember {
   $oktaAPI.Endpoint   = "groups/$groupID/users"
 
   Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Profile -ExcludeProperty credentials, type, Profile
-
-
 }
