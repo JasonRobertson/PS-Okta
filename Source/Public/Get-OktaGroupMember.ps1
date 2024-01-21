@@ -7,7 +7,7 @@ function Get-OktaGroupMember {
     [int]$Limit = 1000,
     [switch]$All
   )
-  Try {
+  try {
     $groupID = (Get-OktaGroup -Identity $Identity).id
     if ($groupID) {
       $oktaAPI            = [hashtable]::new()
@@ -22,5 +22,4 @@ function Get-OktaGroupMember {
   catch {
     Write-Error $PSItem.Exception.Message
   }
-
 }
