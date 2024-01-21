@@ -108,5 +108,5 @@ function Set-OktaUser {
   $oktaAPI.Body     = $body
   $oktaAPI.Endpoint = "/users/$oktaUserID"
 
-  Invoke-OktaAPI @oktaAPI | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+  Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
 }
