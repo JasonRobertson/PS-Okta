@@ -2,59 +2,20 @@ function Get-OktaGroupMember {
   [CmdletBinding()]
   param (
     [parameter(Mandatory)]
-    [Alias('GroupID')]
-    [string]$ID,
-    [ValidateRange(1,200)]
-    [int]$Limit = 200,
-    [switch]$UserProfile,
+    [string]$Identity,
+    [ValidateRange(1,10000)]
+    [int]$Limit = 1000,
     [switch]$All
   )
-  begin {
-    Write-Verbose "BEGIN Block: Start"
-    #Verify the connection has been established
-    $oktaUrl = Test-OktaConnection
-    $headers                  = [hashtable]::new()
-    $headers.Accept           = 'application/json'
-    $headers.Authorization    = Convert-OktaAPIToken
-    #endregion
+  $groupID = (Get-OktaGroup -Identity $Identity).id
 
-    #region Build the body
-    $body         = [hashtable]::new()
-    $body.limit   = $Limit
-    #endregion
+  $oktaAPI            = [hashtable]::new()
+  $oktaAPI.All        = $all
+  $oktaAPI.Body       = [hashtable]::new()
+  $oktaAPI.Body.limit = $Limit
+  $oktaAPI.Endpoint   = "groups/$groupID/users"
 
-    #region Build the Web Request
-    $webRequest                 = [hashtable]::new()
-    $webRequest.Uri             = "$oktaUrl/groups/$Id/users"
-    $webRequest.Body            = $body
-    $webRequest.Method          = 'GET'
-    $webRequest.Headers         = $headers
-    $webRequest.UseBasicParsing = $true
-    #endregion
-  }
-  process {
-    switch ($all) {
-      False {
-          $response = Invoke-WebRequest @webRequest
-          switch ($UserProfile){
-            True  {(ConvertFrom-Json $response.Content).Profile}
-            False {ConvertFrom-Json $response.Content}
-          }
-        }
-      true {
-        do{
-          $response = Invoke-WebRequest @webRequest
-          $webRequest.Uri = $response.RelationLink.next #RelationLink is the recommended approach for pagination from Okta.
-          $webRequest.Remove('Body')
-          switch ($UserProfile){
-            True  {(ConvertFrom-Json $response.Content).Profile}
-            False {ConvertFrom-Json $response.Content}
-          }
-        } until (-not $response.RelationLink.next)
-      }
-    }
-  }
-  end {
-    [system.gc]::Collect();
-  }
+  Invoke-OktaAPI @oktaAPI | Select-Object -ExpandProperty Profile -ExcludeProperty credentials, type, Profile
+
+
 }
