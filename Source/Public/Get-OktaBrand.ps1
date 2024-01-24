@@ -19,13 +19,8 @@ function Get-OktaBrand {
       'Name: dev-56213942_default'
     }.invoke() | Out-String
 
-    $errorRecord = [System.Management.Automation.ErrorRecord]::new(
-    [Exception]::new($message),
-    'ErrorID',
-    [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-    'Okta'
-    )
-    $pscmdlet.ThrowTerminatingError($errorRecord)
+    $oktaError = Write-OktaError $message
+    $pscmdlet.ThrowTerminatingError($oktaError)
   }
   else {
     return $response | Select-Object -ExpandProperty defaultApp -ExcludeProperty _links, defaultApp
