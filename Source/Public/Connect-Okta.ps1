@@ -85,11 +85,11 @@ function Connect-Okta {
           CompanyName   = $organization.CompanyName
           SubDomain     = $organization.SubDomain
           URI           = $uri
-          ApiToken      = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $($apiToken.GetNetworkCredential().password)"
+          ApiToken      = $apiToken
           User          = $requestor.profile.login
           ID            = $requestor.Id 
         }
-        $connectionOkta | Format-List CompanyName, Subdomain, User, ID
+        $connectionOkta | Select-Object -ExcludeProperty APIToken | Format-List
       }
     }
     catch {

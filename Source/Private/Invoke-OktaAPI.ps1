@@ -23,7 +23,7 @@ function Invoke-OktaAPI {
   $restMethod.ContentType           = 'application/json'
   $restMethod.Headers               = [hashtable]::new()
   $restMethod.Headers.Accept        = 'application/json'
-  $restMethod.Headers.Authorization = Convert-OktaAPIToken
+  $restMethod.Headers.Authorization = "SSWS $($connectionOkta.ApiToken.GetNetworkCredential().password)"
   $restMethod.FollowRelLink         = $all
 
   try {
