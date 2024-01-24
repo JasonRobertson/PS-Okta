@@ -45,7 +45,7 @@ function Connect-Okta {
     [parameter(Mandatory)]
     [string]$Domain,
     [parameter(Mandatory, ParameterSetName='ApiToken')]
-    [string]$ApiToken,
+    [pscredential]$ApiToken,
     [switch]$Preview
   )
   begin {
@@ -56,7 +56,7 @@ function Connect-Okta {
 
     $headers               = [hashtable]::new()
     $headers.Accept        = 'application/json'
-    $headers.Authorization = "SSWS $ApiToken"
+    $headers.Authorization = "SSWS $($apiToken.GetNetworkCredential().password)"
 
     $restMethod             = [hashtable]::new()
     $restMethod.Method      = 'GET'
@@ -85,7 +85,7 @@ function Connect-Okta {
           CompanyName   = $organization.CompanyName
           SubDomain     = $organization.SubDomain
           URI           = $uri
-          ApiToken      = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $ApiToken"
+          ApiToken      = ConvertTo-SecureString -AsPlainText -Force -String "SSWS $($apiToken.GetNetworkCredential().password)"
           User          = $requestor.profile.login
           ID            = $requestor.Id 
         }
