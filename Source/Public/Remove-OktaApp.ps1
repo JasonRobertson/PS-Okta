@@ -5,13 +5,20 @@ function Remove-OktaApp {
     [string]$Identity
   )
   try {
-    $appID = (Get-OktaApp -Identity $identity).id
-    if ($appID.count -eq 1) {
-      $oktaAPI              = [hashtable]::new()
-      $oktaAPI.Method       = 'DELETE'
-      $oktaAPI.Endpoint     = "apps/$appID"
-
-      Invoke-OktaAPI @oktaAPI
+    $app = (Get-OktaApp -Identity $identity)
+    if ($app.count -eq 1) {
+      if ($app.Status -eq 'INACTIVE') {
+        $oktaAPI              = [hashtable]::new()
+        $oktaAPI.Method       = 'DELETE'
+        $oktaAPI.Endpoint     = "apps/$($app.id)"
+  
+        Invoke-OktaAPI @oktaAPI
+      }
+      $message = {
+        "$($app.Label) application cannot be removed while it is active."
+      }.invoke()
+      $oktaError = Write-OktaError $message
+      $pscmdlet.ThrowTerminatingError($oktaError)
     }
     else {
       $message = {
