@@ -1,18 +1,15 @@
-function Reset-OktaUserPasword {
+function Reset-OktaUserPassword {
   [CmdletBinding()]
   param(
     #Okta User ID 
     [string]$Identity,
     #All user sessions are revoked except the current session.
-    [switch]$RevokeSessions
+    [switch]$RevokeSessions,
+    [switch]$SendEmail
   )
-  $endPoint = switch ($RevokeSessions) {
-    False {"users/$Identity/lifecycle/expire_password_with_temp_password"}
-    True  {"users/$Identity/lifecycle/expire_password_with_temp_password?revokeSessions$($RevokeSessions.IsPresent)"}
-  }
   $oktaAPI          = [hashtable]::new()
   $oktaAPI.Method   = 'POST'
-  $oktaAPI.Endpoint = $endPoint
+  $oktaAPI.Endpoint = "users/$Identity/lifecycle/expire_password_with_temp_password?revokeSessions=$($RevokeSessions.IsPresent)&sendEmail=$($SendEmail.IsPresent)"
 
   try {
     Invoke-OktaAPI @oktaAPI
