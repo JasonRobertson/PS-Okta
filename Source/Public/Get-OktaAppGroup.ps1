@@ -10,10 +10,10 @@ function Get-OktaAppGroup {
   )
   $appID = (Get-OktaApp -Identity $Identity).id
   if ($appID) {
-    if ($group) { 
-      $groupID = (Get-OktaGroup -Identity $group).id 
+    if ($group) {
+      $groupID = (Get-OktaGroup -Identity $group).id
       if ($groupID -gt 1) {
-        
+
       }
     }
     $endpoint = switch ($null -eq $GroupID ) {
@@ -25,7 +25,7 @@ function Get-OktaAppGroup {
     $oktaAPI.Body       = [hashtable]::new()
     $oktaAPI.Body.limit = $limit
     $oktaAPI.Endpoint   = $endpoint
-    
+
     (Invoke-OktaAPI @oktaAPI) | Select-Object -ExpandProperty profile -Property * -ExcludeProperty Profile,_links
   }
 }
