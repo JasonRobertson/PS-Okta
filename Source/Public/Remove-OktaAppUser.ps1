@@ -17,7 +17,7 @@ function Remove-OktaAppUser {
           $userID = (Get-OktaUser -Identity $entry).id
           if ($userID) {
             $oktaAPI          = [hashtable]::new()
-            $oktaAPI.endpoint = "apps/$appID/users/$userID"
+            $oktaAPI.endpoint = "apps/$appID/users/$userID?$SendEmail"
             $oktaAPI.Method   = 'DELETE'
             Invoke-OktaAPI @oktaAPI
           }
