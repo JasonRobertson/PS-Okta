@@ -44,7 +44,7 @@ function Get-OktaGroup {
   $oktaAPI.Endpoint = 'groups'
   $oktaAPI.All      = $all
 
-  $results = (Invoke-OktaAPI @oktaAPI) | Select-Object * -ExpandProperty profile -ExcludeProperty objectClass, profile, type,_links
+  $results = (Invoke-OktaAPI @oktaAPI) | Select-Object * -ExpandProperty profile -ExcludeProperty objectClass, profile,_links
   switch (-not $results) {
     True  {
       $message = {"Failed to retrieve Okta group $identity, verify the ID matches one of the examples:"}.invoke()
