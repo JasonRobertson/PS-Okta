@@ -50,13 +50,18 @@ function Connect-Okta {
   )
   begin {
     $uri = switch ($Preview){
-      true  {-join ('https://',$Domain,'.oktapreview.com/api/v1')}
-      false {-join ('https://',$Domain,'.okta.com/api/v1')}
+      true  {-join ('https://',$Domain,'.oktapreview.com')}
+      false {-join ('https://',$Domain,'.okta.com')}
     }
+    $authorization = if ($apiToken){
+      "SSWS $($apiToken.GetNetworkCredential().password)"
+    }
+    else {
 
+    }
     $headers               = [hashtable]::new()
     $headers.Accept        = 'application/json'
-    $headers.Authorization = "SSWS $($apiToken.GetNetworkCredential().password)"
+    $headers.Authorization = $authorization
 
     $restMethod             = [hashtable]::new()
     $restMethod.Method      = 'GET'
@@ -66,11 +71,11 @@ function Connect-Okta {
   process {
     try {
       # Retrieve the Okta Profile associated with the token
-      $restMethod.Uri = "$uri/users/me"
+      $restMethod.Uri = "$uri/api/v1/users/me"
       $requestor      = Invoke-RestMethod @restMethod
 
       # Retrieve the Okta Organization Settings with the token. 
-      $restMethod.Uri = "$uri/org"
+      $restMethod.Uri = "$uri/api/v1/org"
       $organization   = Invoke-RestMethod @restMethod
       If ($requestor){
         $status = switch ($Preview) {
@@ -84,7 +89,7 @@ function Connect-Okta {
         $script:connectionOkta = [pscustomobject][ordered]@{
           CompanyName   = $organization.CompanyName
           SubDomain     = $organization.SubDomain
-          URI           = $uri
+          URI           = "$uri/api/v1"
           ApiToken      = $apiToken
           User          = $requestor.profile.login
           ID            = $requestor.Id 
