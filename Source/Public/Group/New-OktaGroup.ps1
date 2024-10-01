@@ -6,7 +6,6 @@ function New-OktaGroup {
     [string]$Description
   )
   $body                     = [hashtable]::new()
-  $body.type                = $Type
   $body.profile             = [hashtable]::new()
   $body.profile.name        = $Name
   $body.profile.description = $Description
