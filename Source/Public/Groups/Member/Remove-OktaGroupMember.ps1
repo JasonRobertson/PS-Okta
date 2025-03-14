@@ -24,18 +24,12 @@ function Remove-OktaGroupMember {
       foreach ($user in $member) {
         try {
           $oktaUser = Get-OktaUser -Identity $user
-          switch ($oktaUser.status){
-            DEPROVISIONED {
-              Write-Warning "User $user is deprovisioned, skipping user"
-            }
-            Default {
-              $userID           = $oktaUser.Id
-              $oktaAPI          = [hashtable]::New()
-              $oktaAPI.Method   = "DELETE"
-              $oktaAPI.Endpoint = "groups/$groupID/users/$userID"
-              Invoke-OktaAPI @oktaAPI
-            }
-          }
+
+          $userID           = $oktaUser.Id
+          $oktaAPI          = [hashtable]::New()
+          $oktaAPI.Method   = "DELETE"
+          $oktaAPI.Endpoint = "groups/$groupID/users/$userID"
+          Invoke-OktaAPI @oktaAPI
         }
         catch {
           Write-Error $PSItem.Exception.Message
