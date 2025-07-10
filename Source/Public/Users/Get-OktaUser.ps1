@@ -12,6 +12,9 @@ function Get-OktaUser {
     [parameter(ParameterSetName='Default')]
     [datetime]$LastUpdated,
     [parameter(ParameterSetName='Default')]
+    [parameter(ParameterSetName='Identity')]
+    [switch]$RecoveryQuestion,
+    [parameter(ParameterSetName='Default')]
     [validateRange(1,200)]
     [int]$Limit = 200,
     [parameter(ParameterSetName='Default')]
@@ -72,7 +75,14 @@ function Get-OktaUser {
       }
     }
     foreach ($entry in $response) {
-      $entry | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+      switch ($RecoveryQuestion) {
+        true {
+          $entry | Select-Object -Property @{name='recoveryQuestion';e={$_.credentials.recovery_question.question}} -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+        }
+        false {
+          $entry | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+        }
+      }
     }
   }
   end{}
