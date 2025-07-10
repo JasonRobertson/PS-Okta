@@ -75,9 +75,9 @@ function Get-OktaUser {
       }
     }
     foreach ($entry in $response) {
-      switch ($RecoveryQuestion) {
+      switch ($recoveryQuestion) {
         true {
-          $entry | Select-Object -Property @{name='recoveryQuestion';e={$_.credentials.recovery_question.question}} -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
+          $entry | Select-Object -Property *, @{name='recoveryQuestion';e={$_.credentials.recovery_question.question}} -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
         }
         false {
           $entry | Select-Object -Property * -ExpandProperty profile -ExcludeProperty profile, type, credentials, _links
