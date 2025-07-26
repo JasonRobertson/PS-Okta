@@ -113,7 +113,7 @@ function New-OktaOIDCApplication {
   }
 
   # --- Automatic Registration Mode ---
-  if (-not (Test-OktaConnection)) {
+  if (-not (Test-OktaConnection -Quiet)) {
     Write-Error "An active Okta connection is required to register an application. Please connect first using 'Connect-Okta -ApiToken ...'."
     return
   }
@@ -132,16 +132,21 @@ function New-OktaOIDCApplication {
 
   if ($PSCmdlet.ShouldProcess("Okta domain '$($script:connectionOkta.Domain)'", "Create OIDC Application '$AppName'")) {
     $appPayload = @{
-      name  = "native" # This is the internal app type name for 'Native'
-      label = $AppName
-      signOnMode = "OPENID_CONNECT"
-      settings = @{
+      name        = "oidc_client" # Use the generic OIDC template
+      label       = $AppName
+      signOnMode  = "OPENID_CONNECT"
+      credentials = @{
+        oauthClient = @{
+          token_endpoint_auth_method = "none" # Required for public clients using PKCE
+        }
+      }
+      settings    = @{
         oauthClient = @{
           application_type = "native"
           grant_types      = @("authorization_code", "refresh_token")
+          # Only include the response type required for the Authorization Code Flow to avoid conflicts.
           response_types   = @("code")
           redirect_uris    = $RedirectUris
-          token_endpoint_auth_method = "none" # Required for PKCE
         }
       }
     }
@@ -183,7 +188,26 @@ function New-OktaOIDCApplication {
         Write-Host "Use it to connect: Connect-Okta -Domain $($script:connectionOkta.Domain) -ClientID '$($newApp.credentials.oauthClient.client_id)'"
     }
     catch {
-        Write-Error "Failed to create or configure the application. The API returned an error: $($_.Exception.Message). Please ensure your API Token has sufficient permissions (e.g., Application Administrator)."
+        # Start with a base error message
+        $finalErrorMessage = "Failed to create or configure the application. Please ensure your API Token has sufficient permissions (e.g., Application Administrator)."
+
+        # The detailed error from Okta is often in the ErrorDetails message of the ErrorRecord
+        if ($_.ErrorDetails -and $_.ErrorDetails.Message) {
+            try {
+                $oktaError = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
+                if ($oktaError -and $oktaError.errorSummary) {
+                    $finalErrorMessage += "`nOkta API Error: $($oktaError.errorSummary)"
+                }
+            } catch {
+                # If parsing fails, it's not JSON. Just append the raw message.
+                $finalErrorMessage += "`nRaw API Response: $($_.ErrorDetails.Message)"
+            }
+        } else {
+            # Fallback to the main exception message if ErrorDetails is not available
+            $finalErrorMessage += "`nException: $($_.Exception.Message)"
+        }
+
+        throw $finalErrorMessage
     }
   }
 }
