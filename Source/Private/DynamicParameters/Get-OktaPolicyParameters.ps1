@@ -1,5 +1,5 @@
 function Get-OktaPolicyParameters {
-  $dynamicParameters = {}.invoke()
+  $dynamicParameters = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
 
   $includeApp               = [hashtable]::new()
   $includeApp.Name          = 'IncludeApp'

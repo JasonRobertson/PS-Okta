@@ -1,5 +1,5 @@
 function Get-OktaBehaviorRuleParameters {
-  $dynamicParameters = {}.invoke()
+  $dynamicParameters = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
   switch -wildcard ($type) {
     Velocity {
       $velocityKPH               = [hashtable]::new()

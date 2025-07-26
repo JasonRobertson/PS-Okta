@@ -15,9 +15,11 @@ function Get-OktaFeature {
       $oktaAPI          = [hashtable]::new()
       $oktaAPI.Endpoint = "features/$identity"
       Write-Debug $oktaAPI.Endpoint
-      $response = foreach ($entry in (Invoke-OktaAPI @oktaAPI) ) {
-        $entry.stage = $entry.stage.value
-        $entry 
+      # Pipe the response to ForEach-Object to handle both single objects and arrays correctly.
+      $response = Invoke-OktaAPI @oktaAPI | ForEach-Object {
+        # The 'stage' property is an object, so we replace it with its 'value' property.
+        $_.stage = $_.stage.value
+        $_ # Output the modified object
       }
       if ($status){
         $response = $response.Where({$_.Status -eq $status})
