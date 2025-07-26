@@ -8,6 +8,7 @@ function Invoke-OktaAPI {
     $Body,
     [switch]$All
   )
+
   #Verify the connection has been established
   if ($null -eq $script:connectionOkta) {
     throw "Not connected to Okta. Please run Connect-Okta first."
@@ -57,12 +58,44 @@ function Invoke-OktaAPI {
   $restMethod.Headers.Authorization = $authorizationHeader
   $restMethod.FollowRelLink         = $all
 
-  try {
-    # Pipe the response directly to Select-Object to handle both single objects and arrays correctly.
-    Invoke-RestMethod @restMethod | Select-Object -ExcludeProperty _links
-  }
-  catch {
-    # Re-throw the original error record to preserve the full stack trace and details for easier debugging.
-    $pscmdlet.ThrowTerminatingError($_)
+  # --- RATE LIMIT HANDLING & RETRY LOGIC ---
+  $maxRetries = 3
+  for ($retryCount = 1; $retryCount -le $maxRetries; $retryCount++) {
+    try {
+      # Pipe the response directly to Select-Object to handle both single objects and arrays correctly.
+      return Invoke-RestMethod @restMethod | Select-Object -ExcludeProperty _links
+    }
+    catch {
+      # Check for the specific rate limit status code (429)
+      if ($_.Exception.Response -and $_.Exception.Response.StatusCode -eq 429) {
+        if ($retryCount -eq $maxRetries) {
+          Write-Error "Okta API rate limit exceeded. Maximum retries ($maxRetries) reached. Failing."
+          $pscmdlet.ThrowTerminatingError($_) # Throw the last error
+        }
+
+        $headers = $_.Exception.Response.Headers
+        $secondsToWait = 0
+
+        # Okta provides a 'X-Rate-Limit-Reset' header with a Unix epoch timestamp.
+        if ($headers.'X-Rate-Limit-Reset') {
+          $resetTime = [datetimeoffset]::FromUnixTimeSeconds([long]$headers.'X-Rate-Limit-Reset').UtcDateTime
+          $secondsToWait = ($resetTime - [DateTime]::UtcNow).TotalSeconds
+        }
+        else {
+          # Fallback to exponential backoff if the header is missing for some reason.
+          $secondsToWait = [math]::Pow(2, $retryCount)
+        }
+
+        # Ensure we wait at least 1 second, even if the reset time has just passed.
+        if ($secondsToWait -le 0) { $secondsToWait = 1 }
+
+        Write-Warning "Okta API rate limit hit. Retrying in $([math]::Round($secondsToWait, 0)) seconds... (Attempt $retryCount of $maxRetries)"
+        Start-Sleep -Seconds $secondsToWait
+      }
+      else {
+        # For any other error, re-throw it immediately without retrying.
+        $pscmdlet.ThrowTerminatingError($_)
+      }
+    }
   }
 }
