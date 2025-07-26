@@ -1,6 +1,6 @@
 function Get-OktaConnection {
   #Verify the connection has been established
-  if($script:connectionOkta.URI) {
+  if($null -ne $script:connectionOkta -and $script:connectionOkta.URI) {
     $script:connectionOkta | Select-Object -ExcludeProperty ApiToken, Tokens
   }
   else {
