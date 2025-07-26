@@ -56,10 +56,6 @@ This guide shows the recommended one-time setup to use the modern and secure OAu
 
 New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster [here](https://github.com/RamblingCookieMonster/PowerShell/blob/master/New-DynamicParam.ps1).
 
-## About ModuleBuilder
-
-You can find the source of ModuleBuilder [here](https://github.com/PoshCode/ModuleBuilder).
-
 ## Version History
 0.0.1 - Very first release \
 0.0.2 - Filename restructure \
