@@ -1,14 +1,14 @@
-Function New-OktaPKCE {
-  [cmdletbinding()]
-  param(
-    [Parameter(Mandatory = $false, ValueFromPipeline = $true)]
-    [int]$Length = 128
-  )
+function New-OktaPKCE {
+    [CmdletBinding()]
+    param(
+        [Parameter(ValueFromPipeline)]
+        [int]$Length = 128
+    )
 
-  if ($length -gt 128 -or $length -lt 43) {
-    Write-Warning "Must be of 43 to 128 characters in length (inclusive)."
-  }
-  else {
+    if ($Length -gt 128 -or $Length -lt 43) {
+        Write-Warning "Code Verifier length must be between 43 and 128 characters (inclusive)."
+    }
+    else {
     # From the ASCII Table in Decimal A-Z a-z 0-9
     $codeVerifier = -join (((48..57) * 4) + ((65..90) * 4) + ((97..122) * 4) | Get-Random -Count $length | ForEach-Object { [char]$_ })
 

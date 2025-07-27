@@ -56,13 +56,10 @@ This guide shows the recommended one-time setup to use the modern and secure OAu
 
 New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster [here](https://github.com/RamblingCookieMonster/PowerShell/blob/master/New-DynamicParam.ps1).
 
-## About ModuleBuilder
-
-You can find the source of ModuleBuilder [here](https://github.com/PoshCode/ModuleBuilder).
-
 ## Version History
 0.0.1 - Very first release \
 0.0.2 - Filename restructure \
 0.0.3 - Code revamp with helper functions
 0.0.4 - Additional functions \
 0.1.0 - Implemented OAuth 2.0 PKCE authentication, automatic token refresh, and a complete auth system overhaul.
+0.2.0 - Overhauled build system to be dependency-free. Refactored core API function for stability and corrected a major bug in pipeline output handling.

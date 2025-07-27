@@ -158,6 +158,95 @@ function New-OktaOIDCApplication {
         Write-Host -ForegroundColor Green "Successfully created application '$($newApp.label)'."
         Write-Host "Your new Client ID is: $($newApp.credentials.oauthClient.client_id)"
 
+<<<<<<< Updated upstream
+=======
+        # --- Grant Required API Scopes ---
+        # This step is crucial for the OAuth connection to be able to read user and org details.
+        # Start with the minimum required scopes and add any custom scopes requested.
+        $scopesToGrant = @('okta.users.read.self', 'okta.orgs.read')
+        if ($PSBoundParameters.ContainsKey('AssignAdminRole') -and $AssignAdminRole) {
+            # Special handling for Super Administrator to ensure all available scopes are granted.
+            if ($AssignAdminRole -contains 'Super Administrator') {
+                try {
+                    # Dynamically get all possible scopes from this function's -Scope parameter ValidateSet.
+                    $command = Get-Command 'New-OktaOIDCApplication'
+                    $scopeParameter = $command.Parameters['Scope']
+                    $validateSetAttribute = $scopeParameter.Attributes.Where({$_.TypeId -eq [System.Management.Automation.ValidateSetAttribute]})
+                    $scopesToGrant += $validateSetAttribute.ValidValues
+                } catch {
+                    Write-Warning "Could not dynamically determine all scopes for Super Administrator. Please report this issue."
+                }
+            }
+
+            # Handle all other roles from the map.
+            $otherRoles = $AssignAdminRole | Where-Object { $_ -ne 'Super Administrator' }
+            if ($otherRoles) {
+                $roleScopeMap = Get-OktaRoleScopeMap
+                $otherRoles | ForEach-Object { $scopesToGrant += $roleScopeMap[$_] }
+            }
+        }
+        if ($PSBoundParameters.ContainsKey('Scope')) {
+            $scopesToGrant += $Scope
+        }
+        $scopesToGrant = $scopesToGrant | Select-Object -Unique
+
+        $issuerUri     = $script:connectionOkta.URI.Replace('/api/v1', '') # Get base URI like https://domain.okta.com
+        $grantedScopes = [System.Collections.Generic.List[string]]::new()
+        $failedScopes  = [System.Collections.Generic.List[pscustomobject]]::new()
+        foreach ($scopeId in $scopesToGrant) {
+            if ($PSCmdlet.ShouldProcess("Scope '$scopeId'", "Grant to application '$($newApp.label)'")) {
+                try {
+                    $grantPayload = @{
+                        scopeId = $scopeId
+                        issuer  = $issuerUri
+                    }
+                    # Invoke the API. The internal Invoke-OktaAPI function will handle rate-limit retries automatically.
+                    Invoke-OktaAPI -Method POST -Endpoint "apps/$($newApp.id)/grants" -Body $grantPayload -ErrorAction Stop | Out-Null
+                    Write-Verbose "Successfully granted scope '$scopeId'."
+                    $grantedScopes.Add($scopeId)
+                } catch {
+                    # If Invoke-OktaAPI fails after all retries, it throws a terminating error. We catch it here.
+                    # Attempt to parse a clean error message from the API's JSON response.
+                    $reason = $_.Exception.Message
+                    try {
+                        $responseStream = $_.Exception.Response.GetResponseStream()
+                        $streamReader = New-Object System.IO.StreamReader($responseStream)
+                        $jsonBody = $streamReader.ReadToEnd()
+                        $streamReader.Close()
+                        $responseStream.Close()
+
+                        $errorObject = $jsonBody | ConvertFrom-Json
+                        if ($errorObject.errorSummary) {
+                            $reason = $errorObject.errorSummary
+                            if ($errorObject.errorCauses[0].errorSummary) {
+                                $reason += " ($($errorObject.errorCauses[0].errorSummary))"
+                            }
+                        }
+                    }
+                    catch {
+                        # Fallback to the original exception message if parsing fails.
+                    }
+                    $failedScopes.Add([pscustomobject]@{Scope = $scopeId; Reason = $reason})
+                }
+            }
+        }
+
+        if ($grantedScopes.Count -gt 0) {
+            Write-Host -ForegroundColor Green "Successfully granted the following API scopes:"
+            $grantedScopes | Sort-Object | ForEach-Object { Write-Host " - $_" }
+        }
+
+        # After attempting all grants, show a single, consolidated warning for any that failed.
+        if ($failedScopes.Count -gt 0) {
+            Write-Warning "Failed to automatically grant the following $($failedScopes.Count) scope(s). You may need to grant them manually."
+            $failedScopes | Sort-Object -Property Scope | ForEach-Object {
+                # Use Write-Host for better formatting control of the detailed reasons.
+                Write-Host -ForegroundColor Yellow " - Scope:  $($_.Scope)"
+                Write-Host -ForegroundColor Yellow "   Reason: $($_.Reason)"
+            }
+        }
+
+>>>>>>> Stashed changes
         # --- Application Assignment Logic ---
         if ($AssignToCurrentUser) {
             $userId = $script:connectionOkta.UserID
