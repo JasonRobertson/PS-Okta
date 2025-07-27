@@ -62,3 +62,4 @@ New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonst
 0.0.3 - Code revamp with helper functions
 0.0.4 - Additional functions \
 0.1.0 - Implemented OAuth 2.0 PKCE authentication, automatic token refresh, and a complete auth system overhaul.
+0.2.0 - Overhauled build system to be dependency-free. Refactored core API function for stability and corrected a major bug in pipeline output handling.
