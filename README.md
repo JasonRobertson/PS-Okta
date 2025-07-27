@@ -4,7 +4,6 @@
 - [Requirements](#requirements)
 - [Quick Start](#quick-start)
 - [Credits](#credits)
-- [About ModuleBuilder](#about-modulebuilder)
 - [Version History](#version-history)
 
 # About PS-Okta Module
@@ -23,7 +22,13 @@ PS-Okta is an unofficial module built for Okta Administrators who like to use Po
 - PowerShell 7
 - An Okta Application for authentication. You have two options:
   - **Recommended (OAuth 2.0):** A "Native" OIDC application. The module can help you create this automatically. See the Quick Start guide below.
-  - **Legacy:** An Okta API Token. See Okta's guide on how to create an API token.
+  - **Legacy:** An Okta API Token. To create one:
+    1. Sign in to your Okta Admin Console.
+    2. Navigate to **Security** > **API**.
+    3. Go to the **Tokens** tab and click **Create Token**.
+    4. Give the token a descriptive name (e.g., "PS-Okta Module Token").
+    5. **Important:** Copy the token value immediately. This is the only time it will be displayed.
+    For more details, see the official Okta documentation.
 
 ## Quick Start
 
@@ -54,12 +59,13 @@ This guide shows the recommended one-time setup to use the modern and secure OAu
 
 ## Credits
 
-New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster [here](https://github.com/RamblingCookieMonster/PowerShell/blob/master/New-DynamicParam.ps1).
+New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster here.
 
 ## Version History
-0.0.1 - Very first release \
-0.0.2 - Filename restructure \
-0.0.3 - Code revamp with helper functions
-0.0.4 - Additional functions \
-0.1.0 - Implemented OAuth 2.0 PKCE authentication, automatic token refresh, and a complete auth system overhaul.
-0.2.0 - Overhauled build system to be dependency-free. Refactored core API function for stability and corrected a major bug in pipeline output handling.
+* **0.2.0** - Overhauled build system to be dependency-free. Refactored core API function for stability and corrected a major bug in pipeline output handling.
+* **0.1.0** - Implemented OAuth 2.0 PKCE authentication, automatic token refresh, and a complete auth system overhaul.
+* **0.0.4** - Additional functions
+* **0.0.3** - Code revamp with helper functions
+* **0.0.2** - Filename restructure
+* **0.0.1** - Very first release
+
