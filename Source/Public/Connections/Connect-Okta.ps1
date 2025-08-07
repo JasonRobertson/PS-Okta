@@ -4,24 +4,24 @@
   .DESCRIPTION
     Connect-Okta is used to establish the connection to the Organization Okta. Requires an API Token generated within Okta Admin Portal.
   .EXAMPLE
-    PS C:\> Connect-Okta -Domain my-org -ClientID '0oa123456789abcdefg'
-    
-    Your browser will now open for authentication...
-    Connected successfully to 'My Company' as 'admin@example.com'
+    PS C:\> $secret = Read-Host -AsSecureString -Prompt 'Enter your Okta application client secret'
+    PS C:\> Connect-Okta -Domain my-org -ClientID '0oa123456789abcdefg' -ClientSecret $secret
+
+    Connected successfully to 'My Company' as 'My M2M App'
     
     CompanyName : My Company
     Domain      : my-org
     URI         : https://my-org.okta.com/api/v1
-    User        : admin@example.com
-    UserID      : 00u123456789abcdefg
-    
-    Connects to Okta using the recommended OAuth 2.0 interactive flow.
+    User        : My M2M App
+    UserID      : 0oa123456789abcdefg
+
+    Connects to Okta using the recommended OAuth 2.0 Client Credentials flow. This is the preferred method for automation and service accounts.
   .EXAMPLE
     # This will open a secure prompt. Enter any username and paste your Okta API Token into the password field.
     PS C:\> $cred = Get-Credential -Message 'Enter your Okta API Token'
     PS C:\> Connect-Okta -Domain my-org -ApiToken $cred
 
-    Connects to Okta using a legacy API Token, securely prompting for the token. This is useful for automation or admin tasks.
+    Connects to Okta using an API Token, securely prompting for the token. This is the recommended method for interactive administrative tasks.
   .INPUTS
     None
   .OUTPUTS
@@ -30,27 +30,48 @@
     No other cmdlets will work without having run Connect-Okta first.
 #>
 function Connect-Okta {
-  [CmdletBinding(DefaultParameterSetName='OAuth')]
+  [CmdletBinding(DefaultParameterSetName='ClientCredentials')]
   param(
-    [parameter(Mandatory)]
+    [Parameter(ParameterSetName='ClientCredentials')]
+    [Parameter(ParameterSetName='ApiToken')]
     [string]$Domain,
 
     # --- API Token Parameter Set ---
-    [parameter(Mandatory, ParameterSetName='ApiToken')]
+        [parameter(ParameterSetName='ApiToken')]
     [pscredential]$ApiToken,
 
-    # --- OAuth PKCE Parameter Set ---
-    [parameter(Mandatory, ParameterSetName='OAuth')]
-    [string]$ClientID,
-    [parameter(ParameterSetName='OAuth')]
-    [string]$RedirectUri = 'http://localhost:8080/',
-    [parameter(ParameterSetName='OAuth')]
-    [string[]]$Scopes = @('openid', 'profile', 'email', 'offline_access', 'okta.users.read.self', 'okta.orgs.read'),
+    # --- Client Credentials Parameter Set (ClientSecret is unique to this set) ---
+        [parameter(ParameterSetName='ClientCredentials')]
+    [System.Security.SecureString]$ClientSecret,
+
+    # --- Scopes for Client Credentials ---
+    [parameter(ParameterSetName='ClientCredentials', HelpMessage = "Default: okta.apps.read, okta.orgs.read. Scopes required for the service principal.")]
+    [string[]]$Scopes,
 
     # --- Common Parameters ---
-    [switch]$Preview
+    [switch]$Preview,
+
+    # --- Client Credentials Parameter ---
+    [parameter(ParameterSetName='ClientCredentials')]
+    [string]$ClientID
   )
   process {
+    # Guard clauses for mandatory parameters (must be outside try/catch)
+    if (-not $PSBoundParameters.ContainsKey('Domain')) {
+      throw "Parameter 'Domain' is required."
+    }
+    if ($PSCmdlet.ParameterSetName -eq 'ClientCredentials') {
+      if (-not $PSBoundParameters.ContainsKey('ClientID')) {
+        throw "Parameter 'ClientID' is required for ClientCredentials."
+      }
+      if (-not $PSBoundParameters.ContainsKey('ClientSecret')) {
+        throw "Parameter 'ClientSecret' is required for ClientCredentials."
+      }
+    }
+    if ($PSCmdlet.ParameterSetName -eq 'ApiToken' -and -not $PSBoundParameters.ContainsKey('ApiToken')) {
+      throw "Parameter 'ApiToken' is required for ApiToken."
+    }
+
     try {
       # Initialize a hashtable to gather all connection properties
       $requestor     = $null
@@ -63,9 +84,15 @@ function Connect-Okta {
       }
       Write-Verbose "Using base URI: $baseUri"
 
-      if ($PSCmdlet.ParameterSetName -eq 'OAuth') {
-        # Delegate the entire OAuth 2.0 connection flow to a private helper function.
-        $tokenResponse = New-OktaConnectionOAuth -Domain $Domain -ClientID $ClientID -RedirectUri $RedirectUri -Scopes $Scopes -BaseUri $baseUri
+      if ($PSCmdlet.ParameterSetName -eq 'ClientCredentials') {
+        # Set default scopes for Client Credentials if not provided by the user
+        if (-not $PSBoundParameters.ContainsKey('Scopes')) {
+            # These are the minimum scopes required for Connect-Okta to retrieve app and org details.
+            # Users can override this to request additional permissions for subsequent cmdlets.
+            $Scopes = @('okta.apps.read', 'okta.orgs.read')
+        }
+        # Delegate the Client Credentials flow to its dedicated helper.
+        $tokenResponse = New-OktaConnectionClientCreds -Domain $Domain -ClientID $ClientID -ClientSecret $ClientSecret -BaseUri $baseUri -Scopes $Scopes
       }
       else { # ApiToken Parameter Set
         # Delegate the API Token connection flow to a private helper function.
@@ -78,8 +105,12 @@ function Connect-Okta {
       $commonHeaders = @{ Accept = 'application/json'; Authorization = $authHeader }
 
       if ($null -eq $requestor) {
-        Write-Verbose "Fetching user details from /api/v1/users/me."
-        $requestor = Invoke-RestMethod -Method GET -Uri "$baseUri/api/v1/users/me" -Headers $commonHeaders
+        if ($PSCmdlet.ParameterSetName -eq 'ClientCredentials') {
+            # For M2M auth, the "user" is the application itself. Fetch its details.
+            Write-Verbose "Fetching application details for Client ID: $ClientID"
+            $appDetails = Invoke-RestMethod -Method GET -Uri "$baseUri/api/v1/apps/$ClientID" -Headers $commonHeaders
+            $requestor = [pscustomobject]@{ Id = $appDetails.id; profile = @{ login = $appDetails.label } }
+        }
       }
 
       Write-Verbose "Fetching organization details from /api/v1/org."
@@ -97,7 +128,7 @@ function Connect-Okta {
       }
 
       # Add authentication-specific properties which are not for display
-      if ($PSCmdlet.ParameterSetName -eq 'OAuth') {
+      if ($PSCmdlet.ParameterSetName -eq 'ClientCredentials') {
           $connectionObject.Tokens   = $tokenResponse
           $connectionObject.ClientID = $ClientID
       } else {
@@ -111,14 +142,6 @@ function Connect-Okta {
 
       # Display the connection details using the standard Get-OktaConnection cmdlet for consistency.
       Get-OktaConnection -IncludeOktaScopes
-      
-      # If connected with the legacy method, recommend upgrading.
-      if ($PSCmdlet.ParameterSetName -eq 'ApiToken') {
-          Write-Host # Add a newline for spacing
-          Write-Host -ForegroundColor Yellow "Recommendation: You've connected using a legacy API Token. For enhanced security, consider upgrading to the modern OAuth 2.0 flow."
-          Write-Host -ForegroundColor Yellow "Run 'New-OktaOIDCApplication' for a guided setup, or see the Okta documentation for more details:"
-          Write-Host -ForegroundColor Cyan "https://developer.okta.com/docs/api/openapi/okta-oauth/guides/overview/"
-      }
     }
     catch {
       Write-Host -ForegroundColor Red    "Failed to connect to Okta"

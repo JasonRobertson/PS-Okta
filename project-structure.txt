@@ -1,0 +1,220 @@
+Folder PATH listing
+Volume serial number is A87F-209F
+C:.
+¦   .gitignore
+¦   Install-Requirements.ps1
+¦   LICENSE
+¦   nuget.exe
+¦   pre-build.ps1
+¦   project-structure.txt
+¦   README.md
+¦   Start-ModuleBuild.ps1
+¦   Start-NugetBuild.ps1
+¦   Start-PSScriptAnalyzer.ps1
+¦   
++---.github
+¦   +---workflows
+¦           build.yml
+¦           
++---Output
+¦   ¦   okta_apps_output.txt
+¦   ¦   
+¦   +---PS-Okta
+¦           PS-Okta.nuspec
+¦           PS-Okta.psd1
+¦           PS-Okta.psm1
+¦           README.md
+¦           
++---Source
+¦   ¦   PS-Okta.nuspec
+¦   ¦   PS-Okta.psd1
+¦   ¦   
+¦   +---Private
+¦   ¦   +---Applications
+¦   ¦   ¦       Get-OktaRoleScopeMap.ps1
+¦   ¦   ¦       Show-OktaOIDCApplicationGuide.ps1
+¦   ¦   ¦       
+¦   ¦   +---Authentication
+¦   ¦   ¦       Confirm-OktaPKCE.ps1
+¦   ¦   ¦       New-OktaConnectionApiToken.ps1
+¦   ¦   ¦       New-OktaConnectionClientCreds.ps1
+¦   ¦   ¦       New-OktaConnectionOAuth.ps1
+¦   ¦   ¦       New-OktaPKCE.ps1
+¦   ¦   ¦       Receive-OktaAuthorizationCode.ps1
+¦   ¦   ¦       Request-OktaRefreshToken.ps1
+¦   ¦   ¦       Request-OktaToken.ps1
+¦   ¦   ¦       
+¦   ¦   +---Connections
+¦   ¦   ¦       New-OktaSessionObject.ps1
+¦   ¦   ¦       
+¦   ¦   +---Core
+¦   ¦   ¦       Confirm-OktaConnection.ps1
+¦   ¦   ¦       Submit-OktaAPIRequest.ps1
+¦   ¦   ¦       
+¦   ¦   +---DynamicParameters
+¦   ¦           Get-OktaBehaviorRuleParameters.ps1
+¦   ¦           Get-OktaPolicyParameters.ps1
+¦   ¦           New-DynamicParameter.ps1
+¦   ¦           
+¦   +---Public
+¦       +---Applications
+¦       ¦   ¦   Get-OktaApp.ps1
+¦       ¦   ¦   New-OktaOIDCApplication.ps1
+¦       ¦   ¦   
+¦       ¦   +---Certificate
+¦       ¦   ¦       Copy-OktaAppCertificate.ps1
+¦       ¦   ¦       Get-OktaAppCertificate.ps1
+¦       ¦   ¦       
+¦       ¦   +---Group
+¦       ¦   ¦       Get-OktaAppGroup.ps1
+¦       ¦   ¦       Remove-OktaAppGroup.ps1
+¦       ¦   ¦       
+¦       ¦   +---Lifecycle
+¦       ¦   ¦       Disable-OktaApp.ps1
+¦       ¦   ¦       Enable-OktaApp.ps1
+¦       ¦   ¦       Remove-OktaApp.ps1
+¦       ¦   ¦       
+¦       ¦   +---User
+¦       ¦           Add-OktaAppUser.ps1
+¦       ¦           Get-OktaAppUser.ps1
+¦       ¦           Remove-OktaAppUser.ps1
+¦       ¦           Set-OktaAppUser.ps1
+¦       ¦           
+¦       +---Authorization Servers
+¦       ¦       Get-OktaOIDCConfig.ps1
+¦       ¦       
+¦       +---Brands
+¦       ¦       Get-OktaBrand.ps1
+¦       ¦       New-OktaBrand.ps1
+¦       ¦       Remove-OktaBrand.ps1
+¦       ¦       
+¦       +---Connections
+¦       ¦       Connect-Okta.ps1
+¦       ¦       Disconnect-Okta.ps1
+¦       ¦       Get-OktaConnection.ps1
+¦       ¦       Test-OktaConnection.ps1
+¦       ¦       
+¦       +---Core
+¦       ¦       Invoke-OktaAPI.ps1
+¦       ¦       
+¦       +---Custom Domains
+¦       ¦       Confirm-OktaDomain.ps1
+¦       ¦       Get-OktaDomain.ps1
+¦       ¦       New-OktaDomain.ps1
+¦       ¦       Set-OktaDomain.ps1
+¦       ¦       
+¦       +---Email Domains
+¦       ¦       Get-OktaEmailDomin.ps1
+¦       ¦       New-OktaEmailDomain.ps1
+¦       ¦       Remove-OktaEmailDomain.ps1
+¦       ¦       
+¦       +---Features
+¦       ¦       Get-OktaFeature.ps1
+¦       ¦       
+¦       +---Groups
+¦       ¦   ¦   Get-OktaGroup.ps1
+¦       ¦   ¦   New-OktaGroup.ps1
+¦       ¦   ¦   Remove-OktaGroup.ps1
+¦       ¦   ¦   Set-OktaGroup.ps1
+¦       ¦   ¦   
+¦       ¦   +---Member
+¦       ¦   ¦       Add-OktaGroupMember.ps1
+¦       ¦   ¦       Get-OktaGroupMember.ps1
+¦       ¦   ¦       Remove-OktaGroupMember.ps1
+¦       ¦   ¦       
+¦       ¦   +---Owner
+¦       ¦   ¦       Add-OktaGroupOwner.ps1
+¦       ¦   ¦       Get-OktaGroupOwner.ps1
+¦       ¦   ¦       Remove-OktaGroupOwner.ps1
+¦       ¦   ¦       
+¦       ¦   +---Rule
+¦       ¦           Disable-OktaGroupRule.ps1
+¦       ¦           Enable-OktaGroupRule.ps1
+¦       ¦           Get-OktaGroupRule.ps1
+¦       ¦           Set-OktaGroupRule.ps1
+¦       ¦           
+¦       +---Identity Providers
+¦       ¦   ¦   Get-OktaIDP.ps1
+¦       ¦   ¦   
+¦       ¦   +---Lifecycle
+¦       ¦           Disable-OktaIDP.ps1
+¦       ¦           Enable-OktaIDP.ps1
+¦       ¦           
+¦       +---Org Management
+¦       ¦   +---Contacts
+¦       ¦   ¦       Get-OktaOrgContact.ps1
+¦       ¦   ¦       Set-OktaOrgContact.ps1
+¦       ¦   ¦       
+¦       ¦   +---Costomization
+¦       ¦   ¦       Disable-OktaDashboardFooter.ps1
+¦       ¦   ¦       Enable-OktaDashboardFooter.ps1
+¦       ¦   ¦       
+¦       ¦   +---General Settings
+¦       ¦   ¦       Get-OktaOrganization.ps1
+¦       ¦   ¦       Set-OktaOrganization.ps1
+¦       ¦   ¦       
+¦       ¦   +---Support Settings
+¦       ¦           Expand-OktaSupportAccess.ps1
+¦       ¦           Get-OktaSupportAccess.ps1
+¦       ¦           Grant-OktaSupportAccess.ps1
+¦       ¦           Revoke-OktaSupportAccess.ps1
+¦       ¦           
+¦       +---Policies
+¦       ¦       Copy-OktaPolicy.ps1
+¦       ¦       Disable-OktaPolicy.ps1
+¦       ¦       Enable-OktaPolicy.ps1
+¦       ¦       Get-OktaPolicy.ps1
+¦       ¦       New-OktaPolicy.ps1
+¦       ¦       
+¦       +---Security
+¦       ¦   +---API Token
+¦       ¦   ¦       Get-OktaAPIToken.ps1
+¦       ¦   ¦       Remove-OktaAPIToken.ps1
+¦       ¦   ¦       
+¦       ¦   +---Behavior Rule
+¦       ¦   ¦       Disable-OktaBehaviorRule.ps1
+¦       ¦   ¦       Enable-OktaBehaviorRule.ps1
+¦       ¦   ¦       Get-OktaBehaviorRule.ps1
+¦       ¦   ¦       New-OktaBehaviorRule.ps1
+¦       ¦   ¦       Remove-OktaBehaviorRule.ps1
+¦       ¦   ¦       Set-OktaBehaviorRule.ps1
+¦       ¦   ¦       
+¦       ¦   +---Device Assurance Policies
+¦       ¦   ¦       Get-OktaDeviceAssurancePolicy.ps1
+¦       ¦   ¦       New-OktaDeviceAssurancePolicy.ps1
+¦       ¦   ¦       Remove-OktaDeviceAssurancePolicy.ps1
+¦       ¦   ¦       
+¦       ¦   +---System Log
+¦       ¦           Get-OktaSystemLogs.ps1
+¦       ¦           
+¦       +---User Types
+¦       ¦       Get-OktaUserType.ps1
+¦       ¦       New-OktaUserType.ps1
+¦       ¦       Remove-OktaUserType.ps1
+¦       ¦       Set-OktaUserType.ps1
+¦       ¦       
+¦       +---Users
+¦           ¦   Get-OktaUser.ps1
+¦           ¦   New-OktaUser.ps1
+¦           ¦   Set-OktaUser.ps1
+¦           ¦   
+¦           +---Credential
+¦           ¦       Reset-OktaUserPassword.ps1
+¦           ¦       
+¦           +---Factor
+¦           ¦       Get-OktaUserMultiFactor.ps1
+¦           ¦       Reset-OktaUserMultiFactor.ps1
+¦           ¦       
+¦           +---Lifecycle
+¦           ¦       Disable-OktaUser.ps1
+¦           ¦       Enable-OktaUser.ps1
+¦           ¦       Suspend-OktaUser.ps1
+¦           ¦       Unlock-OktaUser.ps1
+¦           ¦       
+¦           +---Resources
+¦                   Get-OktaUserAppAssignment.ps1
+¦                   Get-OktaUserGroup.ps1
+¦                   
++---Tests
+        Connect-Okta.Tests.ps1
+        

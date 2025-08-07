@@ -1,28 +1,20 @@
 <#
   .SYNOPSIS
-    Helps create and configure a new OIDC application in Okta for use with this module.
+    Helps create and configure a new Service (M2M) OIDC application in Okta for use with this module.
   .DESCRIPTION
-    This function provides two modes to help a user configure the necessary Native OpenID Connect application in their Okta organization.
+    This function helps an administrator create and configure the necessary Service (Machine-to-Machine) OpenID Connect application in their Okta organization. This type of application is required for unattended automation using the Client Credentials flow (`Connect-Okta -ClientCredentials`).
 
     Default Mode (Informational):
-    Provides a step-by-step guide for manually creating the application in the Okta Admin Console, including the correct settings and links to documentation.
+    Provides a step-by-step guide for manually creating the application in the Okta Admin Console.
 
     Register Mode (-Register):
-    Uses the Okta API to automatically create the application. This requires an active connection to Okta using an API Token with sufficient permissions (e.g., App Admin). By default, the new application is assigned to the current admin user.
+    Uses the Okta API to automatically create the application. This requires an active connection to Okta using an API Token with sufficient permissions (e.g., App Admin). The function will output the generated Client ID and Client Secret, which are needed to connect.
   .PARAMETER AppName
     The name for the new OIDC application in Okta.
-  .PARAMETER RedirectUris
-    The allowed callback URLs for the application. Defaults to the standard localhost URI used by Connect-Okta.
   .PARAMETER Register
     A switch to enable Automatic Registration Mode, which will create the application via the API.
-  .PARAMETER AssignToCurrentUser
-    When used with -Register, this switch assigns the new application to the currently authenticated admin user. This is the default behavior if no other assignment method is specified.
-  .PARAMETER AssignToGroup
-    When used with -Register, this switch assigns the new application to a specific Okta group by name.
-  .PARAMETER AssignToEveryone
-    When used with -Register, this switch assigns the new application to the 'Everyone' group. Use with caution.
   .PARAMETER Scope
-    Specifies additional API scopes to grant to the new application. The base scopes 'okta.users.read.self' and 'okta.orgs.read' are always included to ensure `Connect-Okta` can function.
+    Specifies API scopes to grant to the new service application. The base scopes 'okta.apps.read' and 'okta.orgs.read' are always included to ensure `Connect-Okta` can function.
     You can provide a list of any valid Okta API scopes. This parameter supports tab-completion for all available scopes.
     For a detailed description of each scope, see the Okta documentation: https://developer.okta.com/docs/api/oauth2/#okta-admin-management
   .PARAMETER AssignAdminRole
@@ -31,8 +23,8 @@
   .EXAMPLE
     PS C:\> New-OktaOIDCApplication
 
-    --- Manual OIDC Application Setup Guide ---
-    This guide will walk you through creating a Native OIDC application in Okta...
+    --- Manual Service Application Setup Guide ---
+    This guide will walk you through creating a Service (M2M) OIDC application in Okta...
     ...
 
     This example shows the default behavior, which is to display the informational guide for manually creating the application.
@@ -40,34 +32,22 @@
     # This will open a secure prompt. Enter any username and paste your Okta API Token into the password field.
     PS C:\> $cred = Get-Credential -Message "Enter your Okta API Token"
     PS C:\> Connect-Okta -Domain my-org -ApiToken $cred
-    PS C:\> New-OktaOIDCApplication -AppName "My PowerShell CLI Tool" -Register
+    PS C:\> New-OktaOIDCApplication -AppName "PowerShell Automation" -Register -AssignAdminRole "Read-only Administrator"
     
-    Successfully created application 'My PowerShell CLI Tool'.
+    Successfully created application 'PowerShell Automation'.
     Your new Client ID is: 0oa123456789abcdefg
-    Successfully granted the following API scopes:
-     - okta.users.read.self
-     - okta.orgs.read
-    Successfully assigned application to the current user (admin@example.com).
-    Use it to connect: Connect-Okta -Domain my-org -ClientID '0oa123456789abcdefg'
     
-    This example connects to Okta with an admin API token and then automatically creates the OIDC application. By default, it is assigned to the admin user running the command.
-  .EXAMPLE
-    # This example assumes you have already connected using an API token as shown in the previous example.
-    # It creates an application and assigns it to the 'Everyone' group instead of the default user.
-    PS C:\> New-OktaOIDCApplication -Register -AssignToEveryone
+    ********************************** IMPORTANT **********************************
+    Your Client Secret is: aBcDeFg...xyz
+    This is the ONLY time the secret will be displayed. Store it securely now.
+    *******************************************************************************
 
-    Successfully created application 'PS-Okta PowerShell Module'.
-    Your new Client ID is: 0oa987654321fedcba
     Successfully granted the following API scopes:
-     - okta.users.read.self
+     - okta.apps.read
      - okta.orgs.read
-    Successfully assigned application to the 'Everyone' group.
-    Use it to connect: Connect-Okta -Domain my-org -ClientID '0oa987654321fedcba'
-
-    This example automatically creates an application with the default name 'PS-Okta PowerShell Module' and assigns it to the 'Everyone' group.
-  .EXAMPLE
-    # This example creates an application with specific scopes for managing users.
-    PS C:\> $userAdminScopes = @('okta.users.read', 'okta.users.manage')
+     - ... (other read-only scopes)
+    Use it to connect: $secret = Read-Host -AsSecureString; Connect-Okta -Domain my-org -ClientID '0oa123456789abcdefg' -ClientSecret $secret
+    
     PS C:\> New-OktaOIDCApplication -AppName "User Management Tool" -Register -Scope $userAdminScopes
 
     Successfully created application 'User Management Tool'.
@@ -136,7 +116,7 @@ function New-OktaOIDCApplication {
         'Super Administrator'
     )]
     [string[]]$AssignAdminRole,
-    [Parameter(ParameterSetName='Assign')]
+    [Parameter()]
     [ValidateSet(
         'okta.administrators.manage',
         'okta.administrators.read',
@@ -228,30 +208,16 @@ function New-OktaOIDCApplication {
     return
   }
 
-  # Validate that only one assignment method is used
-  $assignmentParams = @($PSBoundParameters.ContainsKey('AssignToCurrentUser'), $PSBoundParameters.ContainsKey('AssignToGroup'), $PSBoundParameters.ContainsKey('AssignToEveryone'))
-  if (($assignmentParams | Where-Object { $_ }).Count -gt 1) {
-      Write-Error "Please specify only one assignment method: -AssignToCurrentUser, -AssignToGroup, or -AssignToEveryone."
-      return
-  }
-
   if ($PSCmdlet.ShouldProcess("Okta domain '$($script:connectionOkta.Domain)'", "Create OIDC Application '$AppName'")) {
     $appPayload = @{
       name        = "oidc_client" # Use the generic OIDC template
       label       = $AppName
       signOnMode  = "OPENID_CONNECT"
-      credentials = @{
-        oauthClient = @{
-          token_endpoint_auth_method = "none" # Required for public clients using PKCE
-        }
-      }
       settings    = @{
         oauthClient = @{
-          application_type = "native"
-          grant_types      = @("authorization_code", "refresh_token")
-          # Only include the response type required for the Authorization Code Flow to avoid conflicts.
-          response_types   = @("code")
-          redirect_uris    = $RedirectUris
+          application_type = "service"
+          grant_types      = @("client_credentials")
+          token_endpoint_auth_method = "client_secret_post"
         }
       }
     }
@@ -261,12 +227,21 @@ function New-OktaOIDCApplication {
         $newApp = Invoke-OktaAPI -Method POST -Endpoint 'apps' -Body $appPayload -ErrorAction Stop
 
         Write-Host -ForegroundColor Green "Successfully created application '$($newApp.label)'."
-        Write-Host "Your new Client ID is: $($newApp.credentials.oauthClient.client_id)"
+        $clientId = $newApp.credentials.oauthClient.client_id
+        $clientSecret = $newApp.credentials.oauthClient.client_secret
+        Write-Host "Your new Client ID is: $clientId"
+
+        if ($clientSecret) {
+            Write-Host
+            Write-Host -ForegroundColor Black -BackgroundColor Yellow "********************************** IMPORTANT **********************************"
+            Write-Host -ForegroundColor Black -BackgroundColor Yellow "Your Client Secret is: $clientSecret"
+            Write-Host -ForegroundColor Black -BackgroundColor Yellow "This is the ONLY time the secret will be displayed. Store it securely now."
+            Write-Host -ForegroundColor Black -BackgroundColor Yellow "*******************************************************************************"
+            Write-Host
+        }
 
         # --- Grant Required API Scopes ---
-        # This step is crucial for the OAuth connection to be able to read user and org details.
-        # Start with the minimum required scopes and add any custom scopes requested.
-        $scopesToGrant = @('okta.users.read.self', 'okta.orgs.read')
+        $scopesToGrant = @('okta.apps.read', 'okta.orgs.read')
         if ($PSBoundParameters.ContainsKey('AssignAdminRole') -and $AssignAdminRole) {
             # Special handling for Super Administrator to ensure all available scopes are granted.
             if ($AssignAdminRole -contains 'Super Administrator') {
@@ -330,38 +305,7 @@ function New-OktaOIDCApplication {
             $grantedScopes | ForEach-Object { Write-Host " - $_" }
         }
 
-        # --- Application Assignment Logic ---
-        # Determine if an explicit assignment method was chosen by the user.
-        $assignmentMethodSpecified = $PSBoundParameters.ContainsKey('AssignToCurrentUser') -or $PSBoundParameters.ContainsKey('AssignToGroup') -or $PSBoundParameters.ContainsKey('AssignToEveryone')
-
-        # Default to assigning to the current user if no other assignment method is specified.
-        if ($AssignToCurrentUser -or (-not $assignmentMethodSpecified)) {
-            $userId = $script:connectionOkta.UserID
-            if ($PSCmdlet.ShouldProcess("User '$($script:connectionOkta.User)'", "Assign application '$($newApp.label)'")) {
-                Invoke-OktaAPI -Method PUT -Endpoint "apps/$($newApp.id)/users/$userId" -ErrorAction Stop | Out-Null
-                Write-Host -ForegroundColor Green "Successfully assigned application to the current user ($($script:connectionOkta.User))."
-            }
-        }
-        elseif ($AssignToGroup) {
-            if ($PSCmdlet.ShouldProcess("Group '$AssignToGroup'", "Assign application '$($newApp.label)'")) {
-                $group = (Invoke-OktaAPI -Endpoint "groups?q=$AssignToGroup" -ErrorAction Stop) | Where-Object { $_.profile.name -eq $AssignToGroup }
-                if ($group) {
-                    Invoke-OktaAPI -Method PUT -Endpoint "apps/$($newApp.id)/groups/$($group.id)" -ErrorAction Stop | Out-Null
-                    Write-Host -ForegroundColor Green "Successfully assigned application to the '$AssignToGroup' group."
-                } else {
-                    Write-Warning "Could not find the group '$AssignToGroup' to assign the application."
-                }
-            }
-        }
-        elseif ($AssignToEveryone) {
-            if ($PSCmdlet.ShouldProcess("Group 'Everyone'", "Assign application '$($newApp.label)'")) {
-                $everyoneGroup = (Invoke-OktaAPI -Endpoint 'groups?q=Everyone' -ErrorAction Stop) | Where-Object { $_.profile.name -eq 'Everyone' }
-                Invoke-OktaAPI -Method PUT -Endpoint "apps/$($newApp.id)/groups/$($everyoneGroup.id)" -ErrorAction Stop | Out-Null
-                Write-Host -ForegroundColor Green "Successfully assigned application to the 'Everyone' group."
-            }
-        }
-
-        Write-Host "Use it to connect: Connect-Okta -Domain $($script:connectionOkta.Domain) -ClientID '$($newApp.credentials.oauthClient.client_id)'"
+        Write-Host "Use it to connect: `$secret = Read-Host -AsSecureString; Connect-Okta -Domain $($script:connectionOkta.Domain) -ClientID '$clientId' -ClientSecret `$secret"
     }
     catch {
         # Attempt to parse a more specific error message from the Okta API response.

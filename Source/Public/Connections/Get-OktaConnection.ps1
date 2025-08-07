@@ -97,7 +97,7 @@ function Get-OktaConnection {
     }
   }
   else {
-    $output.ConnectionType = 'API Token (Legacy Auth)'
+    $output.ConnectionType = 'API Token'
   }
 
   # Conditionally add the preview property at the end
