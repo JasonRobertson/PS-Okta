@@ -2,9 +2,10 @@
 - [About PS-Okta Module](#about-ps-okta-module)
 - [Features](#features)
 - [Requirements](#requirements)
-- [Quick Start (Interactive Setup)](#quick-start-interactive-setup)
-- [Advanced Usage](#advanced-usage)
-  - [Non-Interactive Authentication (Client Credentials)](#non-interactive-authentication-client-credentials)
+- [Authentication Methods](#authentication-methods)
+  - [API Token](#api-token)
+  - [Non-Interactive (Client Credentials)](#non-interactive-client-credentials)
+<!--  - [Interactive (OAuth 2.0 PKCE)](#interactive-oauth-20-pkce) -->
 - [Credits](#credits)
 - [Version History](#version-history)
 
@@ -15,36 +16,54 @@ PS-Okta is a powerful, unofficial PowerShell module designed to help Okta Admini
 ## Features
 
 - **Modern Authentication:** Connect securely using modern OAuth 2.0 grant types.
-  - **Interactive (User-Based):** Implements the industry-standard Authorization Code Flow with PKCE for attended sessions, ensuring user credentials are never directly handled by the module. Other user-based flows like the Implicit Grant are not supported.
+  <!-- - **Interactive (User-Based):** Implements the industry-standard Authorization Code Flow with PKCE for attended sessions, ensuring user credentials are never directly handled by the module. Other user-based flows like the Implicit Grant are not supported. -->
   - **Automation:** Client Credentials Flow for unattended, server-to-server scripts.
 - **Automatic Token Refresh:** Sessions are automatically maintained in the background, providing a seamless experience.
-- **Legacy Support:** Full backward compatibility for connecting with traditional Okta API tokens.
-- **Guided Setup:** Includes a helper function (`New-OktaOIDCApplication`) to automatically create and configure the required Okta application for interactive OAuth authentication.
+- **Token Support:** Full backward compatibility for connecting with traditional Okta API tokens.
+<!-- - **Guided Setup:** Includes a helper function (`New-OktaOIDCApplication`) to automatically create and configure the required Okta application for interactive OAuth authentication. -->
 
 ## Requirements
 
 - PowerShell 7
-- An Okta Application for authentication. You have three options:
-  - **Recommended (Interactive):** A "Native" OIDC application using the Authorization Code Flow with PKCE. The module can help you create this automatically. See the Quick Start guide below.
-  - **Recommended (Non-Interactive/Automation):** A "Service" OIDC application using the Client Credentials Flow. You will need the Client ID and Client Secret. See Advanced Usage.
-  - **Legacy:** An Okta API Token. To create one:
-    1. Sign in to your Okta Admin Console.
-    2. Navigate to **Security** > **API**.
-    3. Go to the **Tokens** tab and click **Create Token**.
-    4. Give the token a descriptive name (e.g., "PS-Okta Module Token").
-    5. **Important:** Copy the token value immediately. This is the only time it will be displayed.
-    For more details, see the official Okta documentation.
+- An authentication method for your Okta organization. See [Authentication Methods](#authentication-methods) for details on setting up an OIDC application or an API Token.
 
-## Quick Start (Interactive Setup)
+## Authentication Methods
 
-This guide shows the recommended one-time setup to use the modern and secure OAuth 2.0 authentication flow for interactive, attended sessions.
+This module supports multiple ways to connect to your Okta organization.
+
+### API Token
+
+For simple, interactive administrative tasks, you can connect directly using a Okta API Token (SSWS Token). While this method is straightforward, it is less secure for automation as the token is a long-lived, static secret.
+
+1.  **Generate an API Token:**
+    1.  Sign in to your Okta Admin Console.
+    2.  Navigate to **Security** > **API**.
+    3.  Go to the **Tokens** tab and click **Create Token**.
+    4.  Give the token a descriptive name (e.g., "PS-Okta Module Token").
+    5.  **Important:** Copy the token value immediately. This is the only time it will be displayed.
+
+2.  **Connect using the API Token:**
+    To avoid pasting your token in plaintext, it is highly recommended to use `Get-Credential` to securely provide the token.
+
+    ```powershell
+    # This will open a secure prompt.
+    $apiToken = Get-Credential -Message "Enter your Okta API Token"
+
+    # For the user name, you can enter anything (e.g., 'token').
+    # Paste the API token into the password field.
+    Connect-Okta -Domain "your-okta-domain" -ApiToken $apiToken
+    ```
+
+<!-- ### Interactive (OAuth 2.0 PKCE)
+
+This guide shows the recommended one-time setup to use the modern and secure OAuth 2.0 authentication flow for interactive, attended sessions. This requires a "Native" OIDC application.
 
 1.  **Install the module:**
     ```powershell
     Install-Module -Name PS-Okta -Scope CurrentUser
     ```
 
-2.  **Perform a one-time connection using a legacy API token** to create the new application. You will need an API token with permissions to manage applications.
+2.  **Perform a one-time connection using an API token** to create the new application. You will need an API token with permissions to manage applications.
     ```powershell
     # This will open a secure prompt. Enter any username and paste your Okta API Token into the password field.
     $cred = Get-Credential -Message "Enter your Okta Admin API Token for one-time setup"
@@ -61,10 +80,9 @@ This guide shows the recommended one-time setup to use the modern and secure OAu
     ```powershell
     Connect-Okta -Domain "your-okta-domain" -ClientID "YOUR_COPIED_CLIENT_ID"
     ```
+-->
 
-## Advanced Usage
-
-### Non-Interactive Authentication (Client Credentials)
+### Non-Interactive (Client Credentials)
 
 For automated scripts or running in a CI/CD pipeline, the Client Credentials flow is the recommended approach. This method does not require user interaction and avoids storing secrets in plaintext.
 
@@ -128,6 +146,7 @@ For automated scripts or running in a CI/CD pipeline, the Client Credentials flo
 New-DynamicParameter.ps1 credit to BeastMaster, jrich523 and ramblingcookiemonster here.
 
 ## Version History
+* **0.4.0** - Removed support for interactive OAuth 2.0 PKCE authentication, as this flow is not supported by the Okta API for this type of application.
 * **0.3.0** - Added support for non-interactive authentication using the OAuth 2.0 Client Credentials Flow.
 * **0.2.0** - Overhauled build system to be dependency-free. Refactored core API function for stability and corrected a major bug in pipeline output handling.
 * **0.1.0** - Implemented OAuth 2.0 PKCE authentication, automatic token refresh, and a complete auth system overhaul.
