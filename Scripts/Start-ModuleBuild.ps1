@@ -10,9 +10,13 @@ param(
   [version]$Version = '0.0.3'
 )
 
-# Define project paths
-$sourcePath = Join-Path $PSScriptRoot "Source"
-$outputPath = Join-Path $PSScriptRoot "Output\PS-Okta"
+# Script lives under Scripts/; repo root is parent of PSScriptRoot
+$repoRoot = Split-Path $PSScriptRoot -Parent
+. (Join-Path $PSScriptRoot "Export-ModuleIndex.ps1")
+
+# Define project paths (relative to repo root)
+$sourcePath = Join-Path $repoRoot "Source"
+$outputPath = Join-Path $repoRoot (Join-Path "Output" "PS-Okta")
 
 # 1. Clean the output directory for a fresh build
 Write-Host "Cleaning previous build output..."
@@ -35,7 +39,11 @@ Write-Host "Assembling module file: $outputPsm1"
 # 4. Copy the module manifest and other assets
 Write-Host "Copying module manifest and assets..."
 Copy-Item -Path (Join-Path $sourcePath "PS-Okta.psd1") -Destination $outputPath
-Copy-Item -Path (Join-Path $PSScriptRoot "README.md") -Destination $outputPath
+Copy-Item -Path (Join-Path $repoRoot "README.md") -Destination $outputPath
 Copy-Item -Path (Join-Path $sourcePath "PS-Okta.nuspec") -Destination $outputPath
+
+# 5. Generate module index for reference (function name, path, synopsis)
+Write-Host "Generating module index..."
+Export-ModuleIndex -SourcePath $sourcePath -OutputPath $outputPath -RepoRoot $repoRoot
 
 Write-Host -ForegroundColor Green "Build successful. Module created at '$outputPath'."
