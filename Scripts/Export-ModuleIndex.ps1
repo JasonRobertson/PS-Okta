@@ -24,7 +24,7 @@ function Export-ModuleIndex {
     if (-not $funcMatch.Success) { continue }
     $funcName = $funcMatch.Groups[1].Value
     $synopsis = ''
-    $synopsisMatch = [regex]::Match($content, '\.SYNOPSIS\s*\r?\n\s*(.+?)(?=\r?\n\s*\.|\r?\n\r?\n|\z)', [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    $synopsisMatch = [regex]::Match($content, '\.SYNOPSIS\s*\r?\n\s*(.+?)(?=\r?\n\s*\.|\r?\n\s*#>|\r?\n\r?\n|\z)', [System.Text.RegularExpressions.RegexOptions]::Singleline)
     if ($synopsisMatch.Success) {
       $synopsis = ($synopsisMatch.Groups[1].Value -replace '\s+', ' ').Trim()
     }
