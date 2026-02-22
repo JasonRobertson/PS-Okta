@@ -9,6 +9,12 @@ function Get-OktaUser {
     [parameter(ParameterSetName='Default')]
     [ValidateSet('Active','Provisioned','Deprovisioned','Staged','Recovery','Locked','PasswordExpired')]
     [string]$Status,
+    # Filter by first name (profile.firstName)
+    [parameter(ParameterSetName='Default')]
+    [string]$FirstName,
+    # Filter by last name (profile.lastName)
+    [parameter(ParameterSetName='Default')]
+    [string]$LastName,
     # Filter by manager (profile.manager)
     [parameter(ParameterSetName='Default')]
     [string]$Manager,
@@ -43,7 +49,7 @@ function Get-OktaUser {
     # Employee number / ID (profile.employeeNumber)
     [parameter(ParameterSetName='Default')]
     [string]$EmployeeNumber,
-    # User type (profile.userType)
+    # Filter by profile userType (static profile field, e.g. Employee, Contractor)
     [parameter(ParameterSetName='Default')]
     [string]$UserType,
     [parameter(ParameterSetName='Default')]
@@ -57,11 +63,36 @@ function Get-OktaUser {
     [parameter(ParameterSetName='Default')]
     [switch]$All
   )
+  dynamicparam {
+    $userTypeDisplayNames = (Get-OktaUserType -ErrorAction SilentlyContinue | ForEach-Object { $_.displayName })
+    $param = [hashtable]::new()
+    $param.Name = 'Type'
+    $param.Type = [string]
+    $param.ParameterSetName = 'Default'
+    if ($userTypeDisplayNames -and $userTypeDisplayNames.Count -gt 0) {
+      $param.ValidateSet = [string[]]$userTypeDisplayNames
+    }
+    $dict = [PSCustomObject]$param | New-DynamicParameter
+    # ArgumentCompleter so tab completion shows user types instead of path completion (e.g. on macOS)
+    if ($dict.ContainsKey('Type')) {
+      $completer = [System.Management.Automation.ArgumentCompleterAttribute]::new({
+        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+        $displayNames = Get-OktaUserType -ErrorAction SilentlyContinue | ForEach-Object { $_.displayName }
+        if ($wordToComplete) {
+          @($displayNames) | Where-Object { $_ -like "${wordToComplete}*" }
+        } else {
+          @($displayNames)
+        }
+      })
+      $dict['Type'].Attributes.Add($completer)
+    }
+    $dict
+  }
   begin {
-    # Build Okta filter expression from the various filter parameters
-    $filters = @()
+    # Build Okta search expression from the various filter parameters (body.search is required for list/search)
+    $search = [System.Collections.ArrayList]::new()
 
-    $filterStatus = switch ($status) {
+    $statusFilter = switch ($status) {
       Active          {'status eq "ACTIVE"'}
       Staged          {'status eq "STAGED"'}
       Recovery        {'status eq "RECOVERY"'}
@@ -70,30 +101,38 @@ function Get-OktaUser {
       Deprovisioned   {'status eq "DEPROVISIONED"'}
       PasswordExpired {'status eq "PASSWORD_EXPIRED"'}
     }
-    if ($filterStatus)  { $filters += $filterStatus}
+    if ($statusFilter)  { [void]$search.Add($statusFilter) }
 
     if ($LastUpdated) {
-      $filterLastUpdated = "lastUpdated gt ""$(Get-Date $lastUpdated -Format yyyy-MM-ddThh:mm:ss.fffZ)"""
-      $filters += $filterLastUpdated
+      $searchLastUpdated = "lastUpdated gt ""$(Get-Date $lastUpdated -Format yyyy-MM-ddThh:mm:ss.fffZ)"""
+      [void]$search.Add($searchLastUpdated)
     }
 
-    if ($Manager)       { $filters += "profile.manager eq ""$Manager""" }
-    if ($Country)       { $filters += "profile.country eq ""$Country""" }
-    if ($CountryCode)   { $filters += "profile.countryCode eq ""$CountryCode""" }
-    if ($City)          { $filters += "profile.city eq ""$City""" }
-    if ($WorkerType)    { $filters += "profile.workerType eq ""$WorkerType""" }
-    if ($Domain)        { $filters += "profile.login co ""$Domain""" }
-    if ($Department)    { $filters += "profile.department eq ""$Department""" }
-    if ($Division)      { $filters += "profile.division eq ""$Division""" }
-    if ($Organization)  { $filters += "profile.organization eq ""$Organization""" }
-    if ($CostCenter)    { $filters += "profile.costCenter eq ""$CostCenter""" }
-    if ($EmployeeNumber){ $filters += "profile.employeeNumber eq ""$EmployeeNumber""" }
-    if ($UserType)      { $filters += "profile.userType eq ""$UserType""" }
+    if ($FirstName)     { [void]$search.Add("profile.firstName eq ""$FirstName""") }
+    if ($LastName)      { [void]$search.Add("profile.lastName eq ""$LastName""") }
+    if ($Manager)       { [void]$search.Add("profile.manager eq ""$Manager""") }
+    if ($Country)       { [void]$search.Add("profile.country eq ""$Country""") }
+    if ($CountryCode)   { [void]$search.Add("profile.countryCode eq ""$CountryCode""") }
+    if ($City)          { [void]$search.Add("profile.city eq ""$City""") }
+    if ($WorkerType)    { [void]$search.Add("profile.workerType eq ""$WorkerType""") }
+    if ($Domain)        { [void]$search.Add("profile.login co ""$Domain""") }
+    if ($Department)    { [void]$search.Add("profile.department eq ""$Department""") }
+    if ($Division)      { [void]$search.Add("profile.division eq ""$Division""") }
+    if ($Organization)  { [void]$search.Add("profile.organization eq ""$Organization""") }
+    if ($CostCenter)    { [void]$search.Add("profile.costCenter eq ""$CostCenter""") }
+    if ($EmployeeNumber){ [void]$search.Add("profile.employeeNumber eq ""$EmployeeNumber""") }
+    if ($UserType)       { [void]$search.Add("profile.userType eq ""$UserType""") }
+    if ($PSBoundParameters['Type']) {
+      $userTypeValue = $PSBoundParameters['Type']
+      $resolvedId = (Get-OktaUserType -ErrorAction SilentlyContinue | Where-Object { $_.displayName -eq $userTypeValue -or $_.name -eq $userTypeValue } | Select-Object -First 1 -ExpandProperty id)
+      $idForFilter = if ($resolvedId) { $resolvedId } else { $userTypeValue }
+      [void]$search.Add("type.id eq ""$idForFilter""")
+    }
 
     $body         = [hashtable]::new()
     $body.limit   = $limit
-    if ($filters.Count -gt 0) {
-      $body.filter = $filters -join ' and '
+    if ($search.Count -gt 0) {
+      $body.search = $search -join ' and '
     }
   }
   process {
