@@ -19,4 +19,5 @@ PrivateData = @{
         ReleaseNotes = "Get-OktaUser: extended filters (FirstName, LastName, Manager, Country, CountryCode, City, WorkerType, Domain, Department, Division, Organization, CostCenter, EmployeeNumber, UserType); dynamic Type parameter (Okta user type via type.id) with display-name completion. Build: module index (Export-ModuleIndex), Scripts layout, LICENSE in output."
     }
 }
+HelpInfoURI = "https://raw.githubusercontent.com/JasonRobertson/PS-Okta/main/docs/Help/PS-Okta_1.0.3.0_HelpInfo.xml"
 }
