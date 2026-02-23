@@ -64,27 +64,28 @@ function Get-OktaUser {
     [switch]$All
   )
   dynamicparam {
-    $userTypeDisplayNames = (Get-OktaUserType -ErrorAction SilentlyContinue | ForEach-Object { $_.displayName })
     $param = [hashtable]::new()
     $param.Name = 'Type'
     $param.Type = [string]
     $param.ParameterSetName = 'Default'
-    if ($userTypeDisplayNames -and $userTypeDisplayNames.Count -gt 0) {
-      $param.ValidateSet = [string[]]$userTypeDisplayNames
-    }
+    # Omit ValidateSet to avoid Get-Help/platyPS "validValues" error; tab completion via ArgumentCompleter below
     $dict = [PSCustomObject]$param | New-DynamicParameter
     # ArgumentCompleter so tab completion shows user types instead of path completion (e.g. on macOS)
     if ($dict.ContainsKey('Type')) {
-      $completer = [System.Management.Automation.ArgumentCompleterAttribute]::new({
-        param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
-        $displayNames = Get-OktaUserType -ErrorAction SilentlyContinue | ForEach-Object { $_.displayName }
-        if ($wordToComplete) {
-          @($displayNames) | Where-Object { $_ -like "${wordToComplete}*" }
-        } else {
-          @($displayNames)
-        }
-      })
-      $dict['Type'].Attributes.Add($completer)
+      try {
+        $completer = [System.Management.Automation.ArgumentCompleterAttribute]::new({
+          param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+          $displayNames = Get-OktaUserType -ErrorAction SilentlyContinue | ForEach-Object { $_.displayName }
+          if ($wordToComplete) {
+            @($displayNames) | Where-Object { $_ -like "${wordToComplete}*" }
+          } else {
+            @($displayNames)
+          }
+        })
+        $dict['Type'].Attributes.Add($completer)
+      } catch {
+        # Ignore when Attributes.Add fails (e.g. during Get-Help/platyPS introspection)
+      }
     }
     $dict
   }

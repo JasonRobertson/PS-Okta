@@ -1,12 +1,12 @@
 function New-OktaDeviceAssurancePolicy {
   [cmdletbinding()]
   param(
-    [paramter(Mandatory, Position=0)]
+    [parameter(Mandatory, Position=0)]
     [string]$Name,
-    [paramter(Mandatory, Position=1)]
+    [parameter(Mandatory, Position=1)]
     [ValidateSet('ByDateTime','ByDuration')]
     $GracePeriodType,
-    [paramter(Mandatory, Position=0)]
+    [parameter(Mandatory, Position=2)]
     [validateset('Android','iOS','macOS','Windows')]
     [string]$Platform,
     $MinimumVersion,

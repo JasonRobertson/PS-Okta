@@ -40,6 +40,9 @@ Write-Host "Assembling module file: $outputPsm1"
 Write-Host "Copying module manifest and assets..."
 Copy-Item -Path (Join-Path $sourcePath "PS-Okta.psd1") -Destination $outputPath
 Copy-Item -Path (Join-Path $repoRoot "README.md") -Destination $outputPath
+if (Test-Path (Join-Path $repoRoot "LICENSE")) {
+    Copy-Item -Path (Join-Path $repoRoot "LICENSE") -Destination $outputPath
+}
 Copy-Item -Path (Join-Path $sourcePath "PS-Okta.nuspec") -Destination $outputPath
 
 # 5. Generate module index for reference (function name, path, synopsis)

@@ -193,7 +193,7 @@
 			)
 
 			# Convert hashtables to PSObjects and pipe them to the New-DynamicParameter,
-			# to create all dynamic paramters in one function call.
+			# to create all dynamic parameters in one function call.
 			$DynamicParameters | ForEach-Object {New-Object PSObject -Property $_} | New-DynamicParameter
 		}
 		Process
@@ -291,7 +291,7 @@
 			)
 
 			# Convert hashtables to PSObjects and pipe them to the New-DynamicParameter,
-			# to create all dynamic paramters in one function call.
+			# to create all dynamic parameters in one function call.
 			$DynamicParameters | ForEach-Object {New-Object PSObject -Property $_} | New-DynamicParameter
 		}
 		Process
@@ -643,7 +643,7 @@ Function New-DynamicParameter {
 			if($DPDictionary.Keys -contains $Name)
 			{
 				Write-Verbose "Dynamic parameter '$Name' already exist, adding another parameter set to it"
-				$DPDictionary.$Name.Attributes.Add($ParameterAttribute)
+				try { $DPDictionary.$Name.Attributes.Add($ParameterAttribute) } catch { }
 			}
 			else
 			{
@@ -660,12 +660,12 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterOptions = New-Object -TypeName "System.Management.Automation.${_}Attribute" -ArgumentList (. $GetVar) -ErrorAction Stop
-							$AttributeCollection.Add($ParameterOptions)
+							try { $AttributeCollection.Add($ParameterOptions) } catch { }
 							Write-Debug "Added attribute: $_"
 						}
 						Catch
 						{
-							$_
+							# Suppress during help introspection
 						}
 						continue
 					}
@@ -675,19 +675,19 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterAlias = New-Object -TypeName System.Management.Automation.AliasAttribute -ArgumentList (. $GetVar) -ErrorAction Stop
-							$AttributeCollection.Add($ParameterAlias)
+							try { $AttributeCollection.Add($ParameterAlias) } catch { }
 							Write-Debug "Added alias: $_"
 							continue
 						}
 						Catch
 						{
-							$_
+							# Suppress during help introspection
 						}
 					}
 				}
 
 				Write-Debug 'Adding attributes to the attribute collection'
-				$AttributeCollection.Add($ParameterAttribute)
+				try { $AttributeCollection.Add($ParameterAttribute) } catch { }
 
 				Write-Debug 'Finishing creation of the new dynamic parameter'
 				$Parameter = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameter -ArgumentList @($Name, $Type, $AttributeCollection)
@@ -695,7 +695,7 @@ Function New-DynamicParameter {
 					$Parameter.Value = $DefaultValue
 				}
 				Write-Debug 'Adding dynamic parameter to the dynamic parameter dictionary'
-				$DPDictionary.Add($Name, $Parameter)
+				try { $DPDictionary.Add($Name, $Parameter) } catch { }
 			}
 		}
 	}

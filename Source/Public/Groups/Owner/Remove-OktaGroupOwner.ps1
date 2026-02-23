@@ -5,7 +5,7 @@ function Remove-OktaGroupOwner {
     [string]$Identity,
     [parameter(Mandatory,Position=1)]
     [string]$Owner,
-    [parameter(Mandatory,Poistion=2)]
+    [parameter(Mandatory,Position=2)]
     [validateset('Group','User')]
     [string]$Type
   )
