@@ -609,6 +609,9 @@ Function New-DynamicParameter {
 				$DPDictionary = $InternalDictionary
 			}
 
+			# Only suppress Add/introspection errors when Get-Help or platyPS is inspecting the command
+			$isHelpIntrospection = [bool]((Get-PSCallStack).Command | Where-Object { $_ -match 'Get-Help|New-MarkdownHelp|Update-MarkdownHelp' })
+
 			Write-Verbose "Creating new dynamic parameter: $Name"
 
 			# Shortcut for getting local variables
@@ -643,7 +646,7 @@ Function New-DynamicParameter {
 			if($DPDictionary.Keys -contains $Name)
 			{
 				Write-Verbose "Dynamic parameter '$Name' already exist, adding another parameter set to it"
-				try { $DPDictionary.$Name.Attributes.Add($ParameterAttribute) } catch { }
+				try { $DPDictionary.$Name.Attributes.Add($ParameterAttribute) } catch { if (-not $isHelpIntrospection) { throw } }
 			}
 			else
 			{
@@ -660,12 +663,12 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterOptions = New-Object -TypeName "System.Management.Automation.${_}Attribute" -ArgumentList (. $GetVar) -ErrorAction Stop
-							try { $AttributeCollection.Add($ParameterOptions) } catch { }
+							try { $AttributeCollection.Add($ParameterOptions) } catch { if (-not $isHelpIntrospection) { throw } }
 							Write-Debug "Added attribute: $_"
 						}
 						Catch
 						{
-							# Suppress during help introspection
+							if (-not $isHelpIntrospection) { throw }
 						}
 						continue
 					}
@@ -675,19 +678,19 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterAlias = New-Object -TypeName System.Management.Automation.AliasAttribute -ArgumentList (. $GetVar) -ErrorAction Stop
-							try { $AttributeCollection.Add($ParameterAlias) } catch { }
+							try { $AttributeCollection.Add($ParameterAlias) } catch { if (-not $isHelpIntrospection) { throw } }
 							Write-Debug "Added alias: $_"
 							continue
 						}
 						Catch
 						{
-							# Suppress during help introspection
+							if (-not $isHelpIntrospection) { throw }
 						}
 					}
 				}
 
 				Write-Debug 'Adding attributes to the attribute collection'
-				try { $AttributeCollection.Add($ParameterAttribute) } catch { }
+				try { $AttributeCollection.Add($ParameterAttribute) } catch { if (-not $isHelpIntrospection) { throw } }
 
 				Write-Debug 'Finishing creation of the new dynamic parameter'
 				$Parameter = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameter -ArgumentList @($Name, $Type, $AttributeCollection)
@@ -695,7 +698,7 @@ Function New-DynamicParameter {
 					$Parameter.Value = $DefaultValue
 				}
 				Write-Debug 'Adding dynamic parameter to the dynamic parameter dictionary'
-				try { $DPDictionary.Add($Name, $Parameter) } catch { }
+				try { $DPDictionary.Add($Name, $Parameter) } catch { if (-not $isHelpIntrospection) { throw } }
 			}
 		}
 	}
