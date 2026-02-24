@@ -668,7 +668,8 @@ Function New-DynamicParameter {
 						}
 						Catch
 						{
-							if (-not $isHelpIntrospection) { throw }
+							# Emit error and continue so the dynamic parameter is still created without this attribute (fault-tolerant; matches AttributeRegex behavior)
+							if (-not $isHelpIntrospection) { Write-Error $_ }
 						}
 						continue
 					}
@@ -684,7 +685,8 @@ Function New-DynamicParameter {
 						}
 						Catch
 						{
-							if (-not $isHelpIntrospection) { throw }
+							# Emit error and continue so the dynamic parameter is still created without this attribute (fault-tolerant; matches AttributeRegex behavior)
+							if (-not $isHelpIntrospection) { Write-Error $_ }
 						}
 					}
 				}
