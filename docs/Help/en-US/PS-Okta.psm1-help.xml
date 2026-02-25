@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<helpItems xmlns="http://msh" schema="maml">
+  <command:command xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:maml="http://schemas.microsoft.com/maml/2004/10">
+    <command:details>
+      <command:name>Get-OktaUser</command:name>
+      <maml:description>
+        <maml:para>Gets Okta users. Use filters to search, or pass Identity to get by id/login.</maml:para>
+      </maml:description>
+    </command:details>
+  </command:command>
+</helpItems>

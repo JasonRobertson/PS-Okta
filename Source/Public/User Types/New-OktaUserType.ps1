@@ -5,7 +5,7 @@ function New-OktaUserType {
     #The name of the User Type. The name must start with A-Z or a-z and contain only A-Z, a-z, 0-9, or underscore (_) characters. This value becomes read-only after creation and can't be updated.
     [ValidateScript({
       if ($_ -notmatch '^[A-Za-z0-9_]+$') {
-        $message = "The Name paramter value must start with A-Z or a-z and contain only A-Z, a-z, 0-9, or underscore (_) characters. This value becomes read-only after creation and can't be updated."
+        $message = "The Name parameter value must start with A-Z or a-z and contain only A-Z, a-z, 0-9, or underscore (_) characters. This value becomes read-only after creation and can't be updated."
         $errorRecord = [System.Management.Automation.ErrorRecord]::new(
           [Exception]::new($message),
           'ErrorID',

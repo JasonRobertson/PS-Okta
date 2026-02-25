@@ -1,9 +1,9 @@
 function Remove-OktaAppGroup {
   [cmdletbinding()]
   param(
-    [parameter(Mandatory,postion=0)]
+    [parameter(Mandatory,Position=0)]
     [string]$Identity,
-    [parameter(Mandatory,postion=1)]
+    [parameter(Mandatory,Position=1)]
     [string[]]$Group
   )
   begin {

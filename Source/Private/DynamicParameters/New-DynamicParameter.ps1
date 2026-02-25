@@ -193,7 +193,7 @@
 			)
 
 			# Convert hashtables to PSObjects and pipe them to the New-DynamicParameter,
-			# to create all dynamic paramters in one function call.
+			# to create all dynamic parameters in one function call.
 			$DynamicParameters | ForEach-Object {New-Object PSObject -Property $_} | New-DynamicParameter
 		}
 		Process
@@ -291,7 +291,7 @@
 			)
 
 			# Convert hashtables to PSObjects and pipe them to the New-DynamicParameter,
-			# to create all dynamic paramters in one function call.
+			# to create all dynamic parameters in one function call.
 			$DynamicParameters | ForEach-Object {New-Object PSObject -Property $_} | New-DynamicParameter
 		}
 		Process
@@ -609,6 +609,9 @@ Function New-DynamicParameter {
 				$DPDictionary = $InternalDictionary
 			}
 
+			# Only suppress Add/introspection errors when Get-Help or platyPS is inspecting the command
+			$isHelpIntrospection = [bool]((Get-PSCallStack).Command | Where-Object { $_ -match 'Get-Help|New-MarkdownHelp|Update-MarkdownHelp' })
+
 			Write-Verbose "Creating new dynamic parameter: $Name"
 
 			# Shortcut for getting local variables
@@ -643,7 +646,7 @@ Function New-DynamicParameter {
 			if($DPDictionary.Keys -contains $Name)
 			{
 				Write-Verbose "Dynamic parameter '$Name' already exist, adding another parameter set to it"
-				$DPDictionary.$Name.Attributes.Add($ParameterAttribute)
+				try { $DPDictionary.$Name.Attributes.Add($ParameterAttribute) } catch { if (-not $isHelpIntrospection) { throw } }
 			}
 			else
 			{
@@ -660,12 +663,13 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterOptions = New-Object -TypeName "System.Management.Automation.${_}Attribute" -ArgumentList (. $GetVar) -ErrorAction Stop
-							$AttributeCollection.Add($ParameterOptions)
+							try { $AttributeCollection.Add($ParameterOptions) } catch { if (-not $isHelpIntrospection) { throw } }
 							Write-Debug "Added attribute: $_"
 						}
 						Catch
 						{
-							$_
+							# Emit error and continue so the dynamic parameter is still created without this attribute (fault-tolerant; matches AttributeRegex behavior)
+							if (-not $isHelpIntrospection) { Write-Error $_ }
 						}
 						continue
 					}
@@ -675,19 +679,20 @@ Function New-DynamicParameter {
 						Try
 						{
 							$ParameterAlias = New-Object -TypeName System.Management.Automation.AliasAttribute -ArgumentList (. $GetVar) -ErrorAction Stop
-							$AttributeCollection.Add($ParameterAlias)
+							try { $AttributeCollection.Add($ParameterAlias) } catch { if (-not $isHelpIntrospection) { throw } }
 							Write-Debug "Added alias: $_"
 							continue
 						}
 						Catch
 						{
-							$_
+							# Emit error and continue so the dynamic parameter is still created without this attribute (fault-tolerant; matches AttributeRegex behavior)
+							if (-not $isHelpIntrospection) { Write-Error $_ }
 						}
 					}
 				}
 
 				Write-Debug 'Adding attributes to the attribute collection'
-				$AttributeCollection.Add($ParameterAttribute)
+				try { $AttributeCollection.Add($ParameterAttribute) } catch { if (-not $isHelpIntrospection) { throw } }
 
 				Write-Debug 'Finishing creation of the new dynamic parameter'
 				$Parameter = New-Object -TypeName System.Management.Automation.RuntimeDefinedParameter -ArgumentList @($Name, $Type, $AttributeCollection)
@@ -695,7 +700,7 @@ Function New-DynamicParameter {
 					$Parameter.Value = $DefaultValue
 				}
 				Write-Debug 'Adding dynamic parameter to the dynamic parameter dictionary'
-				$DPDictionary.Add($Name, $Parameter)
+				try { $DPDictionary.Add($Name, $Parameter) } catch { if (-not $isHelpIntrospection) { throw } }
 			}
 		}
 	}
